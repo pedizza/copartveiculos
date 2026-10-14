@@ -1,0 +1,29 @@
+node_modules
+.env
+.env.*
+!.env.example
+!.env.production.example
+npm-debug.log*
+fullpage_snapshot_*.png
+.vercel
+Captura de tela de *.png
+whatsapp1.png
+!public/whatsapp1.png
+
+# Arquivos privados e cópias locais
+backups/
+docsigilo.txt
+*.pem
+*.key
+
+# Apenas código e assets publicados; arquivos soltos da cópia ficam locais.
+/*.exe
+/*.deb
+/*.mp4
+/*.jpeg
+/*.jpg
+/*.png
+/veiculos/
+/OUTROS VEICULOS/
+/copart.svg
+/scripts/import-versace-links.js

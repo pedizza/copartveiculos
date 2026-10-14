@@ -1,0 +1,18 @@
+.env
+.env.*
+.git
+.vercel
+node_modules
+backups
+tests
+docs
+*.exe
+*.deb
+*.mp4
+*.jpeg
+*.jpg
+*.png
+!public/**
+veiculos
+OUTROS VEICULOS
+fullpage_snapshot_*
