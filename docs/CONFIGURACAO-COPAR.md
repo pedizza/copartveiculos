@@ -14,7 +14,18 @@ Revisão em 14/10/2026. As alterações se limitam a esta pasta COPAR. O layout 
 - A razão social completa também é usada como assinatura do vendedor dos contratos novos. Não havia contratos preenchidos no banco na atualização.
 - Corrigida a colisão de tokens que podia impedir dois logins no mesmo segundo. Nove testes unitários aprovados.
 
-Continuam pendentes apenas domínio/URLs públicas e credenciais de pagamento. Não houve publicação Vercel.
+Publicado em 14/10/2026 no endereço padrão `https://copartveiculos.vercel.app`; as credenciais de pagamento continuam pendentes. As notas de validação local abaixo registram a etapa anterior à publicação.
+
+## Publicação concluída
+
+- GitHub público: [pedizza/copartveiculos](https://github.com/pedizza/copartveiculos), branch `main`.
+- Novo projeto Vercel: [pedizza/copartveiculos](https://vercel.com/pedizza/copartveiculos), separado dos projetos anteriores.
+- Site público: [copartveiculos.vercel.app](https://copartveiculos.vercel.app), publicado pela CLI autenticada.
+- `APP_ENV=production`; `APP_URL` e `CORS_ORIGIN` usam a origem pública, `APP_DOMAIN=copartveiculos.vercel.app`, callback `https://copartveiculos.vercel.app/api/webhooks/nowbank`.
+- Segredos cadastrados apenas como variáveis do novo projeto; `.env` e arquivos privados excluídos do GitHub e do upload Vercel. O endereço público `/.env` retornou 404.
+- Em produção passaram: 87 veículos com IDs correspondentes ao seed, detalhe de veículo, 202 imagens, páginas públicas, logotipo, foto do pátio, login administrativo, dashboard, consultas de contratos/faturas, rastreio e CORS. A sessão administrativa de validação foi encerrada.
+- A Vercel recusou a conexão automática Git com o repositório novo. Autorizar/conectar o repositório nas configurações Git da Vercel para habilitar deploys por push. O deploy atual está pronto e acessível sem login Vercel.
+- Credenciais NowBank permanecem pendentes; não foram emitidas cobranças reais.
 
 ## Banco e inicialização
 

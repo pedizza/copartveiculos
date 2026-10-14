@@ -1,14 +1,14 @@
-# COPAR
+# COPART Veículos
 
 Consulte [LEIA-ME-COPAR.md](./LEIA-ME-COPAR.md) para configurar o banco novo, importar os 87 veículos e publicar a cópia.
 
-## Documentação do projeto original
+## Projeto publicado
 
 Site institucional com catálogo, página de detalhe, cadastro e login com autenticação JWT própria usando Supabase apenas como banco Postgres.
 
-Repositório: [marielleillha96-del/prime](https://github.com/marielleillha96-del/prime).
+Repositório público: [pedizza/copartveiculos](https://github.com/pedizza/copartveiculos).
 
-O domínio e o projeto Vercel serão definidos posteriormente.
+Site: [copartveiculos.vercel.app](https://copartveiculos.vercel.app). Projeto Vercel separado: `pedizza/copartveiculos`.
 
 ## Stack
 
@@ -82,7 +82,9 @@ Variáveis usadas:
 
 ## Publicação
 
-Deploy no Vercel pendente. Configurar domínio, contatos e variáveis de produção antes de publicar. O arquivo `.env`, os backups e os documentos privados não são versionados.
+Publicado na Vercel em 14/10/2026 pela CLI autenticada. As variáveis de produção foram cadastradas somente no novo projeto; `.env`, backups e arquivos privados não são versionados. Catálogo, 202 imagens, login administrativo, painel e APIs foram verificados no endereço público. As credenciais de pagamento da nova empresa continuam pendentes.
+
+A conexão automática GitHub → Vercel foi recusada pela integração. A publicação atual funciona, mas novos pushes ainda não disparam deploys: é necessário conectar/autorizar `pedizza/copartveiculos` nas configurações Git do projeto Vercel. Enquanto isso, publicar pela CLI autenticada com `vercel deploy --prod --project copartveiculos --scope pedizza`.
 
 Defina `ADMIN_EMAIL` e `ADMIN_PASSWORD` no ambiente. Não existe senha administrativa padrão no código.
 

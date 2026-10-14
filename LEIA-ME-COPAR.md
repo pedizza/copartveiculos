@@ -25,4 +25,6 @@ A pasta original `mega` e seu banco não foram alterados.
 
 ## Revisão e configuração desta cópia
 
-Consulte [docs/CONFIGURACAO-COPAR.md](./docs/CONFIGURACAO-COPAR.md) para o mapa de marca e contatos, configuração do projeto Vercel separado e validações realizadas. O modelo de produção está em `.env.production.example`; o domínio público e as credenciais de pagamento da COPAR ainda precisam ser definidos.
+Consulte [docs/CONFIGURACAO-COPAR.md](./docs/CONFIGURACAO-COPAR.md) para o mapa de marca e contatos, configuração do projeto Vercel separado e validações realizadas. O modelo de produção está em `.env.production.example`; as credenciais de pagamento da COPAR ainda precisam ser definidas.
+
+Publicado em 14/10/2026: [GitHub público](https://github.com/pedizza/copartveiculos) e [site Vercel](https://copartveiculos.vercel.app). O deploy foi feito pela CLI no novo projeto `pedizza/copartveiculos`. A integração automática com o repositório requer autorização/conexão nas configurações Git da Vercel; a tentativa de conexão foi recusada. Não foram alterados projetos da Mega.
