@@ -1,3 +1,4 @@
+import {COMPANY} from '../public/shared/company.js';
 import { findInvoiceByPublicToken, syncInvoiceWithIron } from "../src/invoices/repository.js";
 import { fetchIronTransaction } from "../src/payments/ironpay.js";
 import { handleOptions, sendJson, getQueryParam } from "./_lib/http.js";
@@ -8,6 +9,7 @@ const normalizeInvoicePayload = (invoice) => {
   }
 
   return {
+    issuer: COMPANY,
     id: invoice.id,
     publicToken: invoice.publicToken,
     clientUserId: invoice.clientUserId,

@@ -1,3 +1,4 @@
+import {COMPANY} from '../public/shared/company.js';
 import { ownerScope, assertOwned, listStaff, saveStaff } from "../src/admin/staff.js";
 import { pool } from "../src/auth/db.js";
 import { publicOrigin } from "../public/shared/public-links.js";
@@ -44,7 +45,7 @@ const getTodayInSaoPaulo = () =>
     day: "2-digit"
   }).format(new Date());
 
-const contractSellerName = "Copart do Brasil Organização de Leilões Ltda";
+const contractSellerName = COMPANY.legalName;
 
 const normalizeInvoicePayload = (invoice) => {
   if (!invoice) {
@@ -52,6 +53,7 @@ const normalizeInvoicePayload = (invoice) => {
   }
 
   return {
+    issuer: COMPANY,
     id: invoice.id,
     ownerId: invoice.ownerId,
     publicToken: invoice.publicToken,
@@ -95,6 +97,7 @@ const normalizeContractPayload = (contract) => {
   }
 
   return {
+    issuer: COMPANY,
     id: contract.id,
     ownerId: contract.ownerId,
     contractType: contract.contractType,
@@ -215,6 +218,7 @@ export default async function handler(req, res) {
       }
 
       const data = await getAdminDashboardData(scope);
+      data.company = COMPANY;
       data.actor = sanitizeUser(admin);
       return sendJson(req, res, 200, data);
     }
@@ -614,7 +618,7 @@ export default async function handler(req, res) {
     if (action === "invoices") {
       if (req.method === "GET") {
         const invoices = await listInvoices(scope);
-        return sendJson(req, res, 200, { invoices });
+        return sendJson(req, res, 200, { invoices: invoices.map(normalizeInvoicePayload) });
       }
 
       if (req.method === "POST") {
@@ -665,7 +669,7 @@ export default async function handler(req, res) {
           },
           dueDate: dueDate || undefined,
           metadata: {
-            provider: "COPART",
+            provider: COMPANY.name,
             invoiceTitle: String(title).trim(),
             invoiceToken: publicToken
           },

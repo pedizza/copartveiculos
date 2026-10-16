@@ -35,9 +35,17 @@ try{
  assert.equal((await call(a,'trackings','POST',{clientUserId:c2.user.id,clientName:'Other',itemName:'Manual',trackingCode:'forbidden'})).status,404);
  const contractPayload={clientUserId:c1.user.id,vehicleName:'Test',vehicleModel:'Test',vehicleYear:'2020',amountValue:1000,amountText:'Mil reais',paymentMethod:'Pix',paymentNotes:'À vista',deliveryDate:'2027-01-01',deliveryAddress:'Rua Teste'};
  r=await call(a,'contracts','POST',contractPayload);assert.equal(r.status,201,JSON.stringify(r));const contract=r.contract;assert.equal(contract.ownerId,a.id);
+ assert.equal(contract.sellerName,'Copart do Brasil Organização de Leilões Ltda');
+ assert.equal(contract.issuer.cnpj,'14.517.191/0001-78');
+ assert.ok(contract.documentHtml.includes('Estrada Muranaka, 199'));
  assert.equal((await call(b,'contracts','POST',contractPayload)).status,404);
  assert.equal((await call(a,'invoices','POST',{clientUserId:c2.user.id,title:'Should not bill',amount:100})).status,404);
  const inv=await createInvoice({ownerId:a.id,clientUserId:c1.user.id,clientName:'Test',publicToken:prefix,title:'Fixture only - no gateway',amount:100});
+ const publicInvoiceHandler=(await import('../api/invoices.js')).default;
+ const publicRes={setHeader(){},end(body){this.body=JSON.parse(body);}};
+ await publicInvoiceHandler({method:'GET',headers:{},query:{action:'public',token:prefix}},publicRes);
+ assert.equal(publicRes.statusCode,200);assert.equal(publicRes.body.invoice.issuer.legalName,contract.sellerName);
+ assert.equal(publicRes.body.invoice.issuer.cnpj,'14.517.191/0001-78');
  assert.equal((await call(b,'invoices-sync','POST',{}, {id:inv.id})).status,404);
  const da=await call(a,'dashboard'),db=await call(b,'dashboard');assert.equal(da.status,200,JSON.stringify(da));assert.deepEqual(da.users.map(x=>x.id),[c1.user.id]);assert.deepEqual(db.users.map(x=>x.id),[c2.user.id]);assert.equal(da.trackings.length,1);assert.equal(db.trackings.length,0);assert.equal(da.contractsTotal,1);assert.equal(db.contractsTotal,0);assert.equal(da.catalogItems.length,db.catalogItems.length);assert(da.catalogItems.length>0);assert.deepEqual(da.drivers,db.drivers);
  assert.equal((await call(a,'invoices')).invoices.length,1);assert.equal((await call(b,'invoices')).invoices.length,0);

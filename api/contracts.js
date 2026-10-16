@@ -1,3 +1,4 @@
+import {COMPANY} from '../public/shared/company.js';
 import { findContractByPublicToken, signContractByPublicToken } from "../src/contracts/repository.js";
 import { renderAcquisitionContractHtml } from "../src/contracts/template.js";
 import { handleOptions, readJsonBody, sendJson, getQueryParam } from "./_lib/http.js";
@@ -8,6 +9,7 @@ const normalizeContractPayload = (contract) => {
   }
 
   return {
+    issuer: COMPANY,
     id: contract.id,
     contractType: contract.contractType,
     publicToken: contract.publicToken,

@@ -29,7 +29,7 @@
         <div class="admin-login__card">
           <div class="admin-login__copy">
             <span class="admin-eyebrow">Acesso Restrito</span>
-            <h1>Entrar no painel admin</h1>
+            <h1>Entrar no painel COPART</h1>
             <p>
               Este ambiente é visível somente para o administrador e agora está separado
               em abas para clientes, veículos, motoristas, pátios e rastreios.
@@ -54,7 +54,7 @@
         <section class="admin-layout">
           <aside class="admin-sidebar" id="adminSidebar">
             <div class="admin-sidebar__brand">
-              <h2>Painel Admin</h2>
+              <h2>Painel COPART</h2>
             </div>
 
             <nav class="admin-sidebar__nav">
@@ -398,6 +398,7 @@
                     <div>
                       <span class="admin-eyebrow">Cobrança</span>
                       <h2>Gerar fatura Pix</h2>
+                      <p data-company-issuer></p>
                     </div>
                   </div>
                   <p class="admin-panel-copy">
@@ -450,6 +451,7 @@
                     <div>
                       <span class="admin-eyebrow">Contratos</span>
                       <h2>Gerar contrato</h2>
+                      <p data-company-issuer></p>
                     </div>
                   </div>
                   <p class="admin-panel-copy">
@@ -711,9 +713,18 @@
 
     <script type="module">
       import {clientLink} from "./shared/public-links.js";
+      import {createAdminSession} from "./shared/admin-session.js";
+      import {COMPANY} from "./shared/company.js";
       const invoiceLink = invoice => clientLink("fatura", invoice.publicToken, window.location.origin);
+      document.querySelectorAll("[data-company-issuer]").forEach(element => {
+        element.textContent = `${COMPANY.legalName} · CNPJ ${COMPANY.cnpj}`;
+      });
       import {parseBRL, formatBRL, fullAddress, amountWords, deliveryPaymentSummary} from "./shared/contract-utils.js";
-      const storageKey = "agro_admin_auth";
+      const session = createAdminSession({
+        storage: window.localStorage,
+        fetchImpl: window.fetch.bind(window),
+        onExpired: () => showLogin()
+      });
       const loginSection = document.getElementById("adminLogin");
       const dashboardSection = document.getElementById("adminDashboard");
       const adminLoginForm = document.getElementById("adminLoginForm");
@@ -826,16 +837,7 @@
       let draggedImageIndex = null;
       let driverPhotoBase64 = "";
 
-      const getAuth = () => {
-        try {
-          return JSON.parse(localStorage.getItem(storageKey) || "null");
-        } catch (_error) {
-          return null;
-        }
-      };
-
-      const setAuth = (payload) => localStorage.setItem(storageKey, JSON.stringify(payload));
-      const clearAuth = () => localStorage.removeItem(storageKey);
+      const {getAuth, setAuth, clearAuth} = session;
 
       const setStatus = (element, message, error = false) => {
         element.textContent = message;
@@ -1016,24 +1018,7 @@
       };
 
       const adminFetch = async (url, options = {}) => {
-        const auth = getAuth();
-        const headers = {
-          "Content-Type": "application/json",
-          ...(options.headers || {})
-        };
-
-        if (auth && auth.accessToken) {
-          headers.Authorization = `Bearer ${auth.accessToken}`;
-        }
-
-        const response = await fetch(url, { ...options, headers });
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(data.message || "Erro ao processar a solicitação.");
-        }
-
-        return data;
+        return session.request(url, options);
       };
 
       const renderSimpleList = (target, items, renderer) => {
@@ -2265,9 +2250,10 @@
         }
       });
 
-      adminLogoutButton.addEventListener("click", () => {
-        clearAuth();
+      adminLogoutButton.addEventListener("click", async () => {
+        const logout = session.logout();
         showLogin();
+        await logout.catch(() => {});
       });
 
       clientForm.addEventListener("submit", async (event) => {

@@ -1,3 +1,4 @@
+import {COMPANY} from '../../public/shared/company.js';
 import { TRACKING_ANIMATION_SCHEMA } from "./tracking-animation-schema.js";
 import { pool } from "../auth/db.js";
 import { comparePassword, hashPassword } from "../auth/security.js";
@@ -176,7 +177,7 @@ export const ensureDefaultAdminUser = async () => {
     }
 
     return createUser({
-      fullName: "Administrador COPART",
+      fullName: `Administrador ${COMPANY.name}`,
       email: DEFAULT_ADMIN_EMAIL,
       whatsapp: "",
       cpf: "000.000.000-00",

@@ -1,3 +1,5 @@
+import {COMPANY} from '../../public/shared/company.js';
+
 const escapeHtml = (value) =>
   String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -74,7 +76,7 @@ const formatSignatureHash = (value, fallback) => escapeHtml(String(value || fall
 
 export const renderAcquisitionContractHtml = (contract) => {
   const sellerSignatureText = escapeHtml(
-    formatCompanySignatureText(contract.sellerSignatureText || contract.sellerName || 'Copart do Brasil Organização de Leilões Ltda')
+    formatCompanySignatureText(contract.sellerSignatureText || contract.sellerName || COMPANY.legalName)
   );
   const clientSignatureText = escapeHtml(
     contract.clientSignedAt
@@ -93,9 +95,9 @@ export const renderAcquisitionContractHtml = (contract) => {
     <article class="contract-document">
       <header class="contract-document__header">
         <div class="contract-document__brand">
-          <img src="/copart.svg" alt="COPART" />
+          <img src="${COMPANY.logoUrl}" alt="${COMPANY.name}" />
           <div>
-            <strong>COPART</strong>
+            <strong>${COMPANY.name}</strong>
             <span>LEILÕES E INTERMEDIAÇÕES</span>
           </div>
         </div>
@@ -106,9 +108,9 @@ export const renderAcquisitionContractHtml = (contract) => {
         </div>
 
         <p class="contract-lead">
-          Pelo presente instrumento particular, de um lado <strong>${escapeHtml(contract.sellerName || "Copart do Brasil Organização de Leilões Ltda")}</strong>,
-          inscrita no CNPJ sob o nº <strong>14.517.191/0001-78</strong>, com endereço comercial em
-          <strong>Estrada Muranaka, 199 - Jardim Novo Horizonte, Itaquaquecetuba - SP, CEP 08597-230</strong>,
+          Pelo presente instrumento particular, de um lado <strong>${escapeHtml(contract.sellerName || COMPANY.legalName)}</strong>,
+          inscrita no CNPJ sob o nº <strong>${COMPANY.cnpj}</strong>, com endereço comercial em
+          <strong>${COMPANY.address}</strong>,
           doravante denominada VENDEDORA, e de outro lado <strong>${escapeHtml(contract.clientName || "CLIENTE")}</strong>,
           inscrito no CPF sob o nº <strong>${escapeHtml(contract.clientCpf || "-")}</strong>,
           residente e domiciliado em <strong>${escapeHtml(contract.clientAddress || "-")}</strong>,
@@ -189,14 +191,14 @@ export const renderAcquisitionContractHtml = (contract) => {
 
       <section class="contract-section contract-section--signatures">
         <p>E, por estarem justas e contratadas, as partes firmam o presente instrumento em 02 (DUAS) vias de igual teor e forma, juntamente com as testemunhas abaixo, para que produza seus jurídicos e legais efeitos.</p>
-        <p class="contract-place">ITAQUAQUECETUBA - SP, <strong>${escapeHtml(formatDateLong(contract.createdAt || new Date()))}</strong>.</p>
+        <p class="contract-place">${COMPANY.city.toUpperCase()} - ${COMPANY.state}, <strong>${escapeHtml(formatDateLong(contract.createdAt || new Date()))}</strong>.</p>
 
         <div class="contract-signature-grid">
           <div class="contract-signature">
             <div class="contract-signature__line ${sellerSignatureStyleClass}">
               ${sellerSignatureText}
             </div>
-            <strong>${escapeHtml(contract.sellerName || "Copart do Brasil Organização de Leilões Ltda")}</strong>
+            <strong>${escapeHtml(contract.sellerName || COMPANY.legalName)}</strong>
             <span>VENDEDOR</span>
             <small class="contract-signature__hash">HASH DE SEGURANÇA: ${sellerSignatureHash}</small>
           </div>

@@ -91,6 +91,7 @@
 <script src="./mobile-access.js"></script>
     <script type="module">
       import { pixReceiverName } from "./shared/pix.js";
+      import { COMPANY } from "./shared/company.js";
       const invoiceRoot = document.getElementById("invoiceRoot");
 
       const formatCurrency = (value) =>
@@ -190,6 +191,18 @@
                   <h2>Dados da fatura</h2>
                 </div>
                 <dl class="invoice-details">
+                  <div>
+                    <dt>Empresa emissora</dt>
+                    <dd>${COMPANY.legalName}</dd>
+                  </div>
+                  <div>
+                    <dt>CNPJ da empresa</dt>
+                    <dd>${COMPANY.cnpj}</dd>
+                  </div>
+                  <div>
+                    <dt>Endereço da empresa</dt>
+                    <dd>${COMPANY.address}</dd>
+                  </div>
                   <div>
                     <dt>Cliente</dt>
                     <dd>${invoice.clientName || "-"}</dd>

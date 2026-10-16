@@ -18,6 +18,14 @@ Publicado em 14/10/2026 no endereço padrão `https://copartveiculos.vercel.app`
 
 ## Publicação concluída
 
+### Atualização de acesso e documentos — 16/10/2026
+
+Login administrativo conferido em produção com as credenciais atuais, sem alterá-las. A sessão do painel passou a usar `copart_admin_auth`, migrando a sessão anterior neste mesmo domínio. O painel renova o acesso expirado, compartilha a renovação entre solicitações simultâneas e encerra a sessão no servidor ao sair.
+
+`public/shared/company.js` centraliza razão social, CNPJ, endereço e logotipo. Os contratos e os dados enviados pelas APIs usam essa configuração. A fatura mostra a empresa emissora, o CNPJ e o endereço nos detalhes, mantendo o recebedor real informado pelo código Pix. O painel identifica a emissora nos formulários de contratos e faturas. Credenciais de pagamento continuam pendentes; não foram emitidas cobranças reais.
+
+Os 87 veículos foram excluídos do banco de produção por solicitação do usuário em 16/10/2026. O catálogo permanece vazio; os testes de documentos e operações usam apenas PostgreSQL temporário local, sem restaurar veículos ou inserir clientes/documentos fictícios na produção. Os seeds históricos permanecem como arquivos de origem, sem importação automática.
+
 - GitHub público: [pedizza/copartveiculos](https://github.com/pedizza/copartveiculos), branch `main`.
 - Novo projeto Vercel: [pedizza/copartveiculos](https://vercel.com/pedizza/copartveiculos), separado dos projetos anteriores.
 - Site público: [copartveiculos.vercel.app](https://copartveiculos.vercel.app), publicado pela CLI autenticada.

@@ -1,3 +1,4 @@
+import {COMPANY} from './public/shared/company.js';
 import adminApiHandler from "./api/admin.js";
 import contractsApiHandler from "./api/contracts.js";
 import { publicOrigin } from "./public/shared/public-links.js";
@@ -178,6 +179,7 @@ const normalizeInvoicePayload = (invoice) => {
   }
 
   return {
+    issuer: COMPANY,
     id: invoice.id,
     publicToken: invoice.publicToken,
     clientUserId: invoice.clientUserId,
@@ -491,7 +493,7 @@ app.post("/api/admin/invoices", adminRequired, async (req, res) => {
       },
       dueDate: dueDate || undefined,
       metadata: {
-        provider: "COPART",
+        provider: COMPANY.name,
         invoiceTitle: String(title).trim(),
         invoiceToken: publicToken
       },
