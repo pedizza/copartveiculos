@@ -24,14 +24,14 @@ Login administrativo conferido em produção com as credenciais atuais, sem alte
 
 `public/shared/company.js` centraliza razão social, CNPJ, endereço e logotipo. Os contratos e os dados enviados pelas APIs usam essa configuração. A fatura mostra a empresa emissora, o CNPJ e o endereço nos detalhes, mantendo o recebedor real informado pelo código Pix. O painel identifica a emissora nos formulários de contratos e faturas. Credenciais de pagamento continuam pendentes; não foram emitidas cobranças reais.
 
-Em 16/10/2026, os 87 veículos originais foram excluídos do banco por solicitação do usuário. Em 17/10/2026, a pedido do usuário, foram adicionados ao COPART 20 anúncios locais do projeto Mega: 16 tratores e 4 caminhões, com seus preços e descrições. As 96 fotos foram copiadas para os assets do COPART. Nenhum cliente, funcionário, motorista, fatura, contrato preenchido ou rastreio da Mega foi importado; os dados do banco Mega não foram consultados nem alterados. `seed/catalog.json` e `src/admin/default-catalog.js` agora contêm somente os 20 itens selecionados; WhatsApp foi removido.
+Em 16/10/2026, os 87 veículos originais foram excluídos do banco por solicitação do usuário. Em 17/10/2026, foram adicionados ao COPART 20 anúncios locais de tratores e caminhões, seguidos de 16 carros das pastas fornecidas pelo usuário, com preços e descrições informados por ele. As 174 fotos estão copiadas nos assets locais do COPART. Os 16 carros estão em destaque na home, intercalados com tratores e caminhões. Nenhum cliente, funcionário, motorista, fatura, contrato preenchido ou rastreio da Mega foi importado; o banco Mega não foi consultado nem alterado. `seed/catalog.json` e `src/admin/default-catalog.js` contêm os 36 itens atuais; WhatsApp foi removido.
 
 - GitHub público: [pedizza/copartveiculos](https://github.com/pedizza/copartveiculos), branch `main`.
 - Novo projeto Vercel: [pedizza/copartveiculos](https://vercel.com/pedizza/copartveiculos), separado dos projetos anteriores.
 - Site público: [copartveiculos.vercel.app](https://copartveiculos.vercel.app), publicado pela CLI autenticada.
 - `APP_ENV=production`; `APP_URL` e `CORS_ORIGIN` usam a origem pública, `APP_DOMAIN=copartveiculos.vercel.app`, callback `https://copartveiculos.vercel.app/api/webhooks/nowbank`.
 - Segredos cadastrados apenas como variáveis do novo projeto; `.env` e arquivos privados excluídos do GitHub e do upload Vercel. O endereço público `/.env` retornou 404.
-- Na validação de 14/10/2026, o catálogo inicial tinha 87 veículos e 202 imagens. Após a atualização de 17/10/2026, o banco COPART contém apenas 20 itens selecionados, com 96 fotos locais.
+- Na validação de 14/10/2026, o catálogo inicial tinha 87 veículos e 202 imagens. Após as atualizações de 17/10/2026, o banco COPART contém 36 itens selecionados, com 174 fotos locais.
 - A conexão automática Git da Vercel com o repositório segue pendente. O deploy de produção de 17/10/2026 foi enviado pela CLI ao projeto COPART separado e está pronto em `https://copartveiculos.vercel.app`.
 - Credenciais NowBank permanecem pendentes; não foram emitidas cobranças reais.
 
@@ -83,14 +83,14 @@ Os links técnicos de veículos, faturas e contratos usam a origem da COPAR, sem
 
 ## Validação
 
-`npm run setup:copar` foi executado originalmente com sucesso. Na ocasião, o banco recebeu 87 veículos; eles foram removidos em 16/10/2026. Em 17/10/2026, o importador direcionado inseriu 20 anúncios (16 tratores e 4 caminhões), sem apagar os demais dados COPART. O comando `npm run catalog:import-copart-trucks-tractors` é idempotente e importa somente as categorias autorizadas. O banco COPART tem um pátio e um usuário administrador; não há clientes ou funcionários importados. Login administrativo e dashboard foram aprovados anteriormente, sem exibir as credenciais.
+`npm run setup:copar` foi executado originalmente com sucesso. Na ocasião, o banco recebeu 87 veículos; eles foram removidos em 16/10/2026. Em 17/10/2026, os importadores adicionaram somente os veículos autorizados pelo usuário, sem apagar outros dados COPART. O comando `npm run catalog:import-copart` é idempotente. O banco COPART tem um pátio e um usuário administrador; não há clientes ou funcionários da Mega. Login administrativo e dashboard foram aprovados anteriormente, sem exibir as credenciais.
 
-Na publicação de 17/10/2026, o endpoint público retornou os 20 veículos selecionados, com 16 tratores, 4 caminhões e nenhum contato WhatsApp. As 96 imagens responderam com HTTP 200; home, catálogo, painel, contrato e fatura responderam com HTTP 200. A aparência não foi redesenhada; esta revisão não inclui uma auditoria visual completa em navegador.
+Na publicação de 17/10/2026, o endpoint público retornou os 36 veículos selecionados e nenhum contato WhatsApp. A home alterna carros e máquinas. As imagens e páginas públicas foram conferidas após a publicação.
 
 As conexões `DATABASE_URL` e `DIRECT_URL` foram aprovadas. No banco temporário também passaram cadastro público, login/perfil de cliente, dashboard de rastreio e bloqueio do acesso administrativo por cliente. Para repetir essa validação isolada nesta máquina: `node scripts/validate-copar-local.mjs` (requer os binários PostgreSQL locais). Todos os arquivos JavaScript revisados passaram na verificação de sintaxe e todos os destinos API de `vercel.json` existem.
 
-- Estado atual do seed: 20 veículos (16 tratores e 4 caminhões), slugs únicos e publicados; um pátio no seed.
-- Estado atual das imagens selecionadas: 96 arquivos locais copiados para `public/catalogo-assets/copart-estoque/`.
+- Estado atual do seed: 36 veículos (16 carros, 16 tratores e 4 caminhões), slugs únicos e publicados; um pátio no seed.
+- Estado atual das imagens selecionadas: 174 arquivos locais em `public/catalogo-assets/copart-estoque/`.
 - Oito testes unitários aprovados: pagamentos em contratos, leitura de PIX, domínio dos links, callback e identificação de banco.
 - Na validação anterior, em PostgreSQL temporário local: inicialização, recusa da segunda execução, nove páginas HTTP, 87 detalhes, 202 imagens, login e dashboard administrativo aprovados.
 - Testes existentes de cadastro/edição/exclusão de catálogo e isolamento de funcionários aprovados somente no banco temporário. Incluem contratos, faturas locais sem gateway, rastreio, autorização e clientes. Nenhum cliente de teste ou documento foi importado para o banco definitivo.

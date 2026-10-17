@@ -25,6 +25,7 @@ docsigilo.txt
 /*.png
 /veiculos/
 /OUTROS VEICULOS/
+/VEICULOS COPART/
 /copart.svg
 /scripts/import-versace-links.js
 .env.local

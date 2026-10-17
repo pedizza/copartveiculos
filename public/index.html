@@ -269,12 +269,28 @@
         });
       };
 
-      fetch("/api/catalog/items?section=destaques&limit=12", { cache: "no-store" })
+      const mixHomeFeaturedItems = (items, limit = 12) => {
+        const machinery = items.filter((item) => ["Caminhões", "Tratores"].includes(item.category));
+        const otherVehicles = items.filter((item) => !["Caminhões", "Tratores"].includes(item.category));
+        const mixed = [];
+
+        while (mixed.length < limit && (machinery.length || otherVehicles.length)) {
+          const preferred = mixed.length % 2 === 0 ? otherVehicles : machinery;
+          const fallback = mixed.length % 2 === 0 ? machinery : otherVehicles;
+          if (preferred.length) mixed.push(preferred.shift());
+          else mixed.push(fallback.shift());
+        }
+
+        return mixed;
+      };
+
+      fetch("/api/catalog/items?section=destaques&limit=100", { cache: "no-store" })
         .then((response) => response.json())
         .then((data) => {
           if (Array.isArray(data.items)) {
-            homeFeaturedGrid.innerHTML = data.items.length
-              ? data.items.map(createProductCard).join("")
+            const featuredItems = mixHomeFeaturedItems(data.items, 12);
+            homeFeaturedGrid.innerHTML = featuredItems.length
+              ? featuredItems.map(createProductCard).join("")
               : '<div class="catalog-empty">Nenhum veículo em destaque no momento.</div>';
           }
         })

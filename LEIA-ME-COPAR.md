@@ -2,7 +2,7 @@
 
 Cópia local da Mega, criada em 14/10/2026. O visual e as funcionalidades de catálogo, painel administrativo, contratos, faturas, funcionários e rastreio foram preservados.
 
-O catálogo inicial de 87 veículos foi removido a pedido do usuário. Em 17/10/2026, foram adicionados somente 16 tratores e 4 caminhões da lista local indicada pelo usuário. Os nomes, preços e descrições estão em `seed/catalog.json`; as 96 fotos copiadas estão em `public/catalogo-assets/copart-estoque/`. Os links e telefones de WhatsApp antigos não foram importados. Os pátios estão em `seed/yards.json`.
+O catálogo inicial de 87 veículos foi removido a pedido do usuário. O catálogo atual tem 16 tratores, 4 caminhões e 16 carros, com 174 fotos locais em `public/catalogo-assets/copart-estoque/`. Os nomes, preços e descrições estão em `seed/catalog.json`. Os carros também entram nos destaques da home, misturados aos tratores e caminhões. Links e telefones de WhatsApp antigos não foram importados. Os pátios estão em `seed/yards.json`.
 
 Não foram copiados clientes, funcionários, motoristas, sessões de login, faturas emitidas, contratos preenchidos nem rastreios existentes. Os modelos de contrato e os recursos para emitir novos documentos continuam disponíveis. Backups, PDFs de faturas, documento privado, histórico Git e vínculo Vercel antigo foram excluídos.
 
@@ -10,10 +10,10 @@ Não foram copiados clientes, funcionários, motoristas, sessões de login, fatu
 
 1. Preencha `DATABASE_URL` e `DIRECT_URL` no `.env` com um banco PostgreSQL novo e vazio.
 2. Confira `ADMIN_EMAIL` e `ADMIN_PASSWORD` no `.env`. Uma senha administrativa nova foi gerada para esta cópia, assim como novos segredos JWT.
-3. Execute `npm run setup:copar`. Isso cria as tabelas, importa somente os 20 tratores e caminhões e os pátios e cria apenas o novo administrador. O comando recusa banco com dados e não apaga registros.
+3. Execute `npm run setup:copar`. Isso cria as tabelas, importa os 36 veículos selecionados e os pátios e cria apenas o novo administrador. O comando recusa banco com dados e não apaga registros.
 4. Execute `npm start` e acesse `http://localhost:3000`.
 
-Trocar apenas as URLs não importa os veículos: execute a inicialização antes de usar o sistema. Para adicionar esses veículos ao banco já existente sem apagar dados, use `npm run catalog:import-copart-trucks-tractors`. A conexão com o banco original foi bloqueada na cópia.
+Trocar apenas as URLs não importa os veículos: execute a inicialização antes de usar o sistema. Para adicionar itens do seed ao banco já existente sem apagar dados, use `npm run catalog:import-copart`. A conexão com o banco original foi bloqueada na cópia.
 
 ## Publicar em outra empresa
 

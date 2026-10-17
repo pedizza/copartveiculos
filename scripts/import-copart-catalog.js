@@ -4,13 +4,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const inputPath = process.argv[2] || "seed/catalog.json";
+const allowedCategories = new Set(["Carros", "Picapes", "SUVs", "Utilitários", "Caminhões", "Tratores"]);
 let pool;
 
 try {
   const records = JSON.parse(await fs.readFile(inputPath, "utf8"));
   if (!Array.isArray(records) || records.length === 0) throw new Error("Arquivo de catálogo vazio ou inválido.");
-  if (records.some((item) => !["Tratores", "Caminhões"].includes(item.category))) {
-    throw new Error("Importação recusada: arquivo contém categoria fora de Tratores/Caminhões.");
+  if (records.some((item) => !allowedCategories.has(item.category))) {
+    throw new Error("Importação recusada: arquivo contém categoria fora do catálogo COPART autorizado.");
   }
   if (records.some((item) => !item.title || !item.slug || !item.image_url || !Array.isArray(item.gallery_images))) {
     throw new Error("Importação recusada: há veículos sem nome, slug ou fotos.");
@@ -58,7 +59,7 @@ try {
   } finally {
     client.release();
   }
-  console.log(`COPART: ${inserted} veículo(s) incluído(s), ${alreadyPresent} já existente(s); apenas tratores e caminhões.`);
+  console.log(`COPART: ${inserted} veículo(s) incluído(s), ${alreadyPresent} já existente(s); registros existentes foram preservados.`);
 } catch (error) {
   console.error("Importação não concluída:", error.message);
   process.exitCode = 1;

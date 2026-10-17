@@ -499,5 +499,419 @@ export const DEFAULT_CATALOG_ITEMS = [
     "galleryCount": 7,
     "description": "MASSEY FERGUSON 4290 – 2015 | CABINADO\nTrator em excelente estado de conservação, pronto para o trabalho!\nPrincipais características: • Cabine fechada (mais conforto e segurança)\n* Comando duplo\n* Pneus novos\n* Pesos traseiros e dianteiros\n* Máquina revisada e bem cuidada\nDocumentação: • Possui nota fiscal de origem\n* Manual disponivel\nRECUPERADO DE FINANCIAMENTO\nOBS : SEM SINISTRO",
     "isPublished": true
+  },
+  {
+    "title": "FOX GII - 2020",
+    "slug": "fox-gii-2020",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 12200,
+    "location": "Sob consulta",
+    "yearLabel": "2020",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/fox-gii-2020/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/fox-gii-2020/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/fox-gii-2020/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/fox-gii-2020/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/fox-gii-2020/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/fox-gii-2020/05.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 5,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "ASTRA SEDAN ADVANTAGE - 2009",
+    "slug": "astra-sedan-advantage-2009",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 13480,
+    "location": "Sob consulta",
+    "yearLabel": "2009",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/astra-sedan-advantage-2009/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/astra-sedan-advantage-2009/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-sedan-advantage-2009/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-sedan-advantage-2009/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-sedan-advantage-2009/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-sedan-advantage-2009/05.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 5,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "S10 LR DD24 - 2015",
+    "slug": "s10-lr-dd24-2015",
+    "category": "Picapes",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 44800,
+    "location": "Sob consulta",
+    "yearLabel": "2015",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/05.jpg",
+      "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/06.jpg",
+      "/catalogo-assets/copart-estoque/carros/s10-lr-dd24-2015/07.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Picapes",
+    "galleryCount": 7,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "ASTRA HATCH 3P - 2003",
+    "slug": "astra-hatch-3p-2003",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 8450,
+    "location": "Sob consulta",
+    "yearLabel": "2003",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/astra-hatch-3p-2003/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/astra-hatch-3p-2003/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-hatch-3p-2003/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-hatch-3p-2003/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-hatch-3p-2003/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-hatch-3p-2003/05.jpg",
+      "/catalogo-assets/copart-estoque/carros/astra-hatch-3p-2003/06.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 6,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "FIAT STRADA ADV CD DUAL - 2012",
+    "slug": "fiat-strada-adv-cd-dual-2012",
+    "category": "Picapes",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 18270,
+    "location": "Sob consulta",
+    "yearLabel": "2012",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/fiat-strada-adv-cd-dual-2012/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adv-cd-dual-2012/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adv-cd-dual-2012/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adv-cd-dual-2012/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adv-cd-dual-2012/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adv-cd-dual-2012/05.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adv-cd-dual-2012/06.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Picapes",
+    "galleryCount": 6,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "FIAT UNO WAY 1.0 - 2013",
+    "slug": "fiat-uno-way-1-0-2013",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 7600,
+    "location": "Sob consulta",
+    "yearLabel": "2013",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/fiat-uno-way-1-0-2013/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-way-1-0-2013/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-way-1-0-2013/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-way-1-0-2013/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-way-1-0-2013/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-way-1-0-2013/05.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 5,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "FIAT STRADA ADVENTURE CD -  2016",
+    "slug": "fiat-strada-adventure-cd-2016",
+    "category": "Picapes",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 20420,
+    "location": "Sob consulta",
+    "yearLabel": "2016",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/05.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/06.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-strada-adventure-cd-2016/07.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Picapes",
+    "galleryCount": 7,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "FIAT UNO VIVACE 1.0 - 2012",
+    "slug": "fiat-uno-vivace-1-0-2012",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 9640,
+    "location": "Sob consulta",
+    "yearLabel": "2012",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/fiat-uno-vivace-1-0-2012/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-vivace-1-0-2012/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-vivace-1-0-2012/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-vivace-1-0-2012/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-vivace-1-0-2012/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-vivace-1-0-2012/05.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-uno-vivace-1-0-2012/06.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 6,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "CHEVROLET CELTA 1.0 LT - 2014",
+    "slug": "chevrolet-celta-1-0-lt-2014",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 10350,
+    "location": "Sob consulta",
+    "yearLabel": "2014",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/chevrolet-celta-1-0-lt-2014/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/chevrolet-celta-1-0-lt-2014/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/chevrolet-celta-1-0-lt-2014/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/chevrolet-celta-1-0-lt-2014/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/chevrolet-celta-1-0-lt-2014/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/chevrolet-celta-1-0-lt-2014/05.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 5,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "SAVEIRO CLI  - 1997",
+    "slug": "saveiro-cli-1997",
+    "category": "Picapes",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 5800,
+    "location": "Sob consulta",
+    "yearLabel": "1997",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/saveiro-cli-1997/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/saveiro-cli-1997/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/saveiro-cli-1997/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/saveiro-cli-1997/03.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Picapes",
+    "galleryCount": 3,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "DUSTER 2.0 FLEX AUT - 2014",
+    "slug": "duster-2-0-flex-aut-2014",
+    "category": "SUVs",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 18840,
+    "location": "Sob consulta",
+    "yearLabel": "2014",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/duster-2-0-flex-aut-2014/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/duster-2-0-flex-aut-2014/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/duster-2-0-flex-aut-2014/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/duster-2-0-flex-aut-2014/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/duster-2-0-flex-aut-2014/04.jpg",
+      "/catalogo-assets/copart-estoque/carros/duster-2-0-flex-aut-2014/05.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "SUVs",
+    "galleryCount": 5,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "KOMBI 1.4 FLEX - 2012",
+    "slug": "kombi-1-4-flex-2012",
+    "category": "Utilitários",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 17600,
+    "location": "Sob consulta",
+    "yearLabel": "2012",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/kombi-1-4-flex-2012/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/kombi-1-4-flex-2012/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/kombi-1-4-flex-2012/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/kombi-1-4-flex-2012/03.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Utilitários",
+    "galleryCount": 3,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "HB20 CONFORT 1.0M - 2017",
+    "slug": "hb20-confort-1-0m-2017",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 23440,
+    "location": "Sob consulta",
+    "yearLabel": "2017",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/hb20-confort-1-0m-2017/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/hb20-confort-1-0m-2017/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/hb20-confort-1-0m-2017/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/hb20-confort-1-0m-2017/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/hb20-confort-1-0m-2017/04.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 4,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "FIAT ARGO 1.0 - 2019",
+    "slug": "fiat-argo-1-0-2019",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 27600,
+    "location": "Sob consulta",
+    "yearLabel": "2019",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/fiat-argo-1-0-2019/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/fiat-argo-1-0-2019/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-argo-1-0-2019/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-argo-1-0-2019/03.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 3,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "FIAT FIORINO FLEX - 2013",
+    "slug": "fiat-fiorino-flex-2013",
+    "category": "Utilitários",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 10400,
+    "location": "Sob consulta",
+    "yearLabel": "2013",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/fiat-fiorino-flex-2013/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/fiat-fiorino-flex-2013/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-fiorino-flex-2013/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-fiorino-flex-2013/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/fiat-fiorino-flex-2013/04.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Utilitários",
+    "galleryCount": 4,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
+  },
+  {
+    "title": "HONDA CIVIC EXL CVT - 2020",
+    "slug": "honda-civic-exl-cvt-2020",
+    "category": "Carros",
+    "sections": [
+      "catalogo",
+      "destaques",
+      "relacionados"
+    ],
+    "price": 37550,
+    "location": "Sob consulta",
+    "yearLabel": "2020",
+    "imageUrl": "/catalogo-assets/copart-estoque/carros/honda-civic-exl-cvt-2020/01.jpg",
+    "galleryImages": [
+      "/catalogo-assets/copart-estoque/carros/honda-civic-exl-cvt-2020/01.jpg",
+      "/catalogo-assets/copart-estoque/carros/honda-civic-exl-cvt-2020/02.jpg",
+      "/catalogo-assets/copart-estoque/carros/honda-civic-exl-cvt-2020/03.jpg",
+      "/catalogo-assets/copart-estoque/carros/honda-civic-exl-cvt-2020/04.jpg"
+    ],
+    "whatsapp": null,
+    "badge": "Carros",
+    "galleryCount": 4,
+    "description": "RECUPERADO DE FINANCIAMENTO",
+    "isPublished": true
   }
 ];

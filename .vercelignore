@@ -15,4 +15,6 @@ docs
 !public/**
 veiculos
 OUTROS VEICULOS
+VEICULOS COPART
+scripts/extrair-catalogo-whatsapp-console.js
 fullpage_snapshot_*
