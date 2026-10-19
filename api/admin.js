@@ -106,12 +106,18 @@ const normalizeContractPayload = (contract) => {
     clientName: contract.clientName,
     clientEmail: contract.clientEmail,
     clientCpf: contract.clientCpf,
+    clientPhone: contract.clientPhone,
+    clientRg: contract.clientRg,
     clientAddress: contract.clientAddress,
     vehicleName: contract.vehicleName,
     vehicleModel: contract.vehicleModel,
     vehicleYear: contract.vehicleYear,
+    vehicleColor: contract.vehicleColor,
+    vehiclePlate: contract.vehiclePlate,
+    vehicleRenavam: contract.vehicleRenavam,
     vehicleDescription: contract.vehicleDescription,
     amountValue: Number(contract.amountValue || 0),
+    documentationValue: contract.documentationValue,
     amountText: contract.amountText,
     paymentMethod: contract.paymentMethod,
     paymentNotes: contract.paymentNotes,
@@ -523,13 +529,19 @@ export default async function handler(req, res) {
           clientUserId,
           clientName,
           clientCpf,
+          clientPhone,
+          clientRg,
           clientAddress,
           clientEmail,
           vehicleName,
           vehicleModel,
           vehicleYear,
+          vehicleColor,
+          vehiclePlate,
+          vehicleRenavam,
           vehicleDescription,
           amountValue,
+          documentationValue,
           amountText,
           paymentMethod,
           paymentNotes,
@@ -543,12 +555,15 @@ export default async function handler(req, res) {
         const client = resolvedClientUserId ? await findUserById(resolvedClientUserId) : null;
         const finalClientName = String(clientName || client?.full_name || "").trim();
         const finalClientCpf = String(clientCpf || client?.cpf || "").trim();
+        const finalClientPhone = String(clientPhone || client?.whatsapp || "").trim() || null;
+        const finalClientRg = String(clientRg || "").trim() || null;
         const finalClientAddress = String(clientAddress || fullAddress(client) || "").trim() || null;
         const finalClientEmail = String(clientEmail || client?.email || "").trim() || null;
         const finalVehicleName = String(vehicleName || "").trim() || null;
         const finalVehicleModel = String(vehicleModel || "").trim() || null;
         const finalVehicleYear = String(vehicleYear || "").trim() || null;
         const finalAmountValue = parseBRL(amountValue);
+        const finalDocumentationValue = String(documentationValue ?? "").trim() === "" ? null : parseBRL(documentationValue);
         const finalAmountText = String(amountText || amountWords(finalAmountValue)).trim() || null;
         const finalPaymentMethod = String(paymentMethod || "").trim() || null;
         let finalPaymentNotes = String(paymentNotes || "").trim() || null;
@@ -559,12 +574,17 @@ export default async function handler(req, res) {
             return sendJson(req, res, 400, { message: error.message });
           }
         }
-        const finalDeliveryAddress = String(deliveryAddress || "").trim() || finalClientAddress;
+        const finalDeliveryAddress = String(deliveryAddress || "").trim() || null;
 
-        if (!finalClientName || !finalClientCpf || !finalClientAddress) {
+        if (!finalClientName || !finalClientCpf || !finalClientPhone || !finalClientAddress) {
           return sendJson(req, res, 400, {
-            message: "Selecione ou informe cliente, CPF e endereço antes de gerar o contrato."
+            message: "Informe nome, CPF, telefone e endereço do cliente antes de gerar o contrato."
           });
+        }
+
+        if (documentationValue !== undefined && String(documentationValue).trim() !== "" &&
+            (!Number.isFinite(finalDocumentationValue) || finalDocumentationValue < 0)) {
+          return sendJson(req, res, 400, { message: "Informe um valor válido para a documentação ou deixe o campo em branco." });
         }
 
         if (!finalVehicleName || !finalVehicleModel || !finalVehicleYear) {
@@ -577,9 +597,9 @@ export default async function handler(req, res) {
           return sendJson(req, res, 400, { message: "Informe um valor válido para o contrato." });
         }
 
-        if (!finalAmountText || !finalPaymentMethod || !finalPaymentNotes || !deliveryDate || !finalDeliveryAddress) {
+        if (!finalAmountText || !finalPaymentMethod || !finalPaymentNotes) {
           return sendJson(req, res, 400, {
-            message: "Preencha valor por extenso, forma de pagamento, observação, data de entrega e endereço de entrega."
+            message: "Preencha valor por extenso, forma de pagamento e condições de pagamento."
           });
         }
 
@@ -592,12 +612,18 @@ export default async function handler(req, res) {
           clientName: finalClientName,
           clientEmail: finalClientEmail,
           clientCpf: finalClientCpf,
+          clientPhone: finalClientPhone,
+          clientRg: finalClientRg,
           clientAddress: finalClientAddress,
           vehicleName: finalVehicleName,
           vehicleModel: finalVehicleModel,
           vehicleYear: finalVehicleYear,
+          vehicleColor: String(vehicleColor || "").trim() || null,
+          vehiclePlate: String(vehiclePlate || "").trim() || null,
+          vehicleRenavam: String(vehicleRenavam || "").trim() || null,
           vehicleDescription: String(vehicleDescription || "").trim() || null,
           amountValue: finalAmountValue,
+          documentationValue: finalDocumentationValue,
           amountText: finalAmountText,
           paymentMethod: finalPaymentMethod,
           paymentNotes: finalPaymentNotes,

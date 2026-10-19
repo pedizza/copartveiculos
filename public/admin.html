@@ -455,7 +455,7 @@
                     </div>
                   </div>
                   <p class="admin-panel-copy">
-                    Gere o contrato de aquisição, envie o link para assinatura e acompanhe o status em tempo real.
+                    Preencha os dados do termo de aquisição, gere o link para assinatura e acompanhe o status em tempo real.
                   </p>
 
                   <div class="admin-subtabs" role="tablist" aria-label="Sub abas de contratos">
@@ -475,6 +475,18 @@
                         <span>CPF DO CLIENTE</span>
                         <input type="text" name="clientCpf" id="contractClientCpf" required />
                       </label>
+                      <label>
+                        <span>TELEFONE DO CLIENTE</span>
+                        <input type="tel" name="clientPhone" id="contractClientPhone" required />
+                      </label>
+                      <label>
+                        <span>RG DO CLIENTE</span>
+                        <input type="text" name="clientRg" id="contractClientRg" />
+                      </label>
+                      <label class="admin-form__full">
+                        <span>E-MAIL DO CLIENTE</span>
+                        <input type="email" name="clientEmail" id="contractClientEmail" />
+                      </label>
                       <label class="admin-form__full">
                         <span>ENDEREÇO DO CLIENTE</span>
                         <textarea name="clientAddress" id="contractClientAddress" rows="3" required></textarea>
@@ -492,10 +504,26 @@
                         <span>ANO DE FABRICAÇÃO</span>
                         <input type="text" name="vehicleYear" id="contractVehicleYear" required />
                       </label>
+                      <label>
+                        <span>COR</span>
+                        <input type="text" name="vehicleColor" id="contractVehicleColor" />
+                      </label>
+                      <label>
+                        <span>PLACA</span>
+                        <input type="text" name="vehiclePlate" id="contractVehiclePlate" />
+                      </label>
+                      <label>
+                        <span>RENAVAM</span>
+                        <input type="text" name="vehicleRenavam" id="contractVehicleRenavam" />
+                      </label>
                       <label class="admin-form__full"><span>DESCRIÇÃO OPCIONAL DO VEÍCULO</span><textarea name="vehicleDescription" id="contractVehicleDescription" rows="3"></textarea></label>
                       <label>
                         <span>VALOR DO VEÍCULO</span>
                         <input type="text" inputmode="decimal" name="amountValue" id="contractAmountValue" placeholder="R$ 0,00" required />
+                      </label>
+                      <label>
+                        <span>VALOR DA DOCUMENTAÇÃO (OPCIONAL)</span>
+                        <input type="text" inputmode="decimal" name="documentationValue" id="contractDocumentationValue" placeholder="Deixe em branco se não definido" />
                       </label>
                       <label class="admin-form__full">
                         <span>VALOR POR EXTENSO</span>
@@ -519,12 +547,12 @@
                         <label class="hidden"><span>DATA DO PAGAMENTO DO RESTANTE NA ENTREGA</span><input id="contractRemainingPaymentDate" type="date" /></label>
                       </div>
                       <label>
-                        <span>DATA DE ENTREGA</span>
-                        <input type="date" name="deliveryDate" id="contractDeliveryDate" required />
+                        <span>PREVISÃO DE ENTREGA (OPCIONAL)</span>
+                        <input type="date" name="deliveryDate" id="contractDeliveryDate" />
                       </label>
                       <label class="admin-form__full">
-                        <span>ENDEREÇO DE ENTREGA</span>
-                        <textarea name="deliveryAddress" id="contractDeliveryAddress" rows="3" required></textarea>
+                        <span>ENDEREÇO DE ENTREGA (OPCIONAL)</span>
+                        <textarea name="deliveryAddress" id="contractDeliveryAddress" rows="3"></textarea>
                       </label>
                       <div class="admin-form__full admin-form__actions">
                         <button class="button button-primary" type="submit" id="contractSubmitButton">Gerar contrato</button>
@@ -796,6 +824,9 @@
       const contractClientOptions = document.getElementById("contractClientOptions");
       const contractClientUserId = document.getElementById("contractClientUserId");
       const contractClientCpf = document.getElementById("contractClientCpf");
+      const contractClientPhone = document.getElementById("contractClientPhone");
+      const contractClientEmail = document.getElementById("contractClientEmail");
+      const contractClientRg = document.getElementById("contractClientRg");
       const contractClientAddress = document.getElementById("contractClientAddress");
       const contractVehicleName = document.getElementById("contractVehicleName");
       const contractVehicleModel = document.getElementById("contractVehicleModel");
@@ -1619,6 +1650,8 @@
         contractClientUserId.value = user.id || "";
         contractClientSearch.value = user.full_name || "";
         contractClientCpf.value = user.cpf || "";
+        contractClientPhone.value = user.whatsapp || "";
+        contractClientEmail.value = user.email || "";
         contractClientAddress.value = buildClientAddress(user) || "";
         contractDeliveryAddress.value = buildClientAddress(user) || "";
       };
@@ -1852,7 +1885,6 @@
       invoiceDueDate.min = getTomorrowDateValue();
       invoiceDueDate.value = getTomorrowDateValue();
       contractDeliveryDate.min = getTomorrowDateValue();
-      contractDeliveryDate.value = getTomorrowDateValue();
 
       const renderDriverPhotoPreview = () => {
         driverPhotoPreview.innerHTML = driverPhotoBase64 ? `<img src="${driverPhotoBase64}" alt="Pré-visualização do motorista" />` : "Sem foto";
@@ -2449,12 +2481,19 @@
               clientUserId: formData.get("clientUserId") || contractClientUserId.value || null,
               clientName: formData.get("clientName"),
               clientCpf: formData.get("clientCpf"),
+              clientPhone: formData.get("clientPhone"),
+              clientRg: formData.get("clientRg"),
+              clientEmail: formData.get("clientEmail"),
               clientAddress: formData.get("clientAddress"),
               vehicleName: formData.get("vehicleName"),
               vehicleModel: formData.get("vehicleModel"),
               vehicleYear: formData.get("vehicleYear"),
+              vehicleColor: formData.get("vehicleColor"),
+              vehiclePlate: formData.get("vehiclePlate"),
+              vehicleRenavam: formData.get("vehicleRenavam"),
               vehicleDescription: formData.get("vehicleDescription"),
               amountValue: parseBRL(formData.get("amountValue")),
+              documentationValue: String(formData.get("documentationValue") || "").trim() ? parseBRL(formData.get("documentationValue")) : null,
               amountText: formData.get("amountText"),
               paymentMethod: formData.get("paymentMethod"),
               paymentNotes: paymentSummary(),

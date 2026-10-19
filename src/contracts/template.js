@@ -90,6 +90,9 @@ export const renderAcquisitionContractHtml = (contract) => {
   const clientSignatureHash = contract.clientSignedAt
     ? formatSignatureHash(contract.clientSignatureHash, `sig_${String(contract.publicToken || "client").slice(0, 8)}`)
     : "PENDENTE DE ASSINATURA";
+  const documentationAmount = contract.documentationValue === null || contract.documentationValue === undefined || contract.documentationValue === ""
+    ? "________________________"
+    : formatCurrency(contract.documentationValue);
 
   return `
     <article class="contract-document">
@@ -103,94 +106,72 @@ export const renderAcquisitionContractHtml = (contract) => {
         </div>
 
         <div class="contract-document__meta">
-          <p class="contract-eyebrow">DOCUMENTO PARTICULAR COM ASSINATURA ELETRÔNICA</p>
-          <h1>CONTRATO DE AQUISIÇÃO DE VEÍCULOS E MAQUINÁRIOS</h1>
+          <p class="contract-eyebrow">TERMO PARTICULAR COM ASSINATURA ELETRÔNICA</p>
+          <h1>TERMO DE AQUISIÇÃO</h1>
         </div>
 
         <p class="contract-lead">
-          Pelo presente instrumento particular, de um lado <strong>${escapeHtml(contract.sellerName || COMPANY.legalName)}</strong>,
-          inscrita no CNPJ sob o nº <strong>${COMPANY.cnpj}</strong>, com endereço comercial em
-          <strong>${COMPANY.address}</strong>,
-          doravante denominada VENDEDORA, e de outro lado <strong>${escapeHtml(contract.clientName || "CLIENTE")}</strong>,
-          inscrito no CPF sob o nº <strong>${escapeHtml(contract.clientCpf || "-")}</strong>,
-          residente e domiciliado em <strong>${escapeHtml(contract.clientAddress || "-")}</strong>,
-          doravante denominado COMPRADOR.
+          Este termo esclarece as responsabilidades e os compromissos de ambas as partes. As partes declaram que este instrumento é válido e reconhecido para os fins a que se destina.
         </p>
       </header>
 
       <section class="contract-section">
-        <h2>CLÁUSULA PRIMEIRA - DO OBJETO</h2>
+        <h2>VENDEDOR</h2>
+        <p><strong>${escapeHtml(contract.sellerName || COMPANY.legalName)}</strong><br />CNPJ: <strong>${COMPANY.cnpj}</strong><br />Endereço: <strong>${COMPANY.address}</strong></p>
+        <p>Por meio deste instrumento, as partes identificadas celebram o presente TERMO DE AQUISIÇÃO, regido pelas cláusulas e condições a seguir.</p>
+      </section>
+
+      <section class="contract-section">
+        <h2>COMPRADOR</h2>
+        <p>Nome: <strong>${escapeHtml(contract.clientName || "-")}</strong> &nbsp; Telefone: <strong>${escapeHtml(contract.clientPhone || "-")}</strong><br />CPF: <strong>${escapeHtml(contract.clientCpf || "-")}</strong> &nbsp; RG: <strong>${escapeHtml(contract.clientRg || "-")}</strong><br />Endereço: <strong>${escapeHtml(contract.clientAddress || "-")}</strong><br />E-mail: <strong>${escapeHtml(contract.clientEmail || "-")}</strong></p>
+        <p>As informações pessoais do comprador anexadas neste documento foram solicitadas pelo consultor e confirmadas pelo comprador, e são protegidas pela Lei Geral de Proteção de Dados (LGPD).</p>
+      </section>
+
+      <section class="contract-section">
+        <h2>DO OBJETO</h2>
         <p>
-          1. Constitui objeto do presente contrato a compra e venda do veículo abaixo identificado:
-          <strong>${escapeHtml([contract.vehicleName, contract.vehicleModel, contract.vehicleYear].filter(Boolean).join(" / ") || "-")}</strong>.
+          1.1. O objeto deste contrato é o veículo descrito abaixo:<br />
+          Veículo: <strong>${escapeHtml([contract.vehicleName, contract.vehicleModel].filter(Boolean).join(" / ") || "-")}</strong><br />
+          Ano: <strong>${escapeHtml(contract.vehicleYear || "-")}</strong><br />
+          Cor: <strong>${escapeHtml(contract.vehicleColor || "-")}</strong><br />
+          Placa: <strong>${escapeHtml(contract.vehiclePlate || "-")}</strong><br />
+          Renavam: <strong>${escapeHtml(contract.vehicleRenavam || "-")}</strong>
         </p>
         ${contract.vehicleDescription ? `<p class="contract-vehicle-description">${escapeHtml(contract.vehicleDescription)}</p>` : ""}
-        <p>1.1. O veículo acima descrito constitui o objeto específico da presente negociação, comprometendo-se o VENDEDOR a realizar sua entrega ao COMPRADOR nas condições estabelecidas neste instrumento.</p>
       </section>
 
       <section class="contract-section">
-        <h2>CLÁUSULA SEGUNDA - DO PREÇO E DA FORMA DE PAGAMENTO</h2>
-        <p>
-          2. O preço ajustado entre as partes para a presente compra e venda é de
-          <strong>${formatCurrency(contract.amountValue)}</strong>
-          <strong>(${escapeHtml(contract.amountText || "")})</strong>.
-        </p>
-        <p>
-          2.1. O pagamento será realizado de forma <strong>${escapeHtml(contract.paymentMethod || "-")}</strong>,
-          conforme condições ajustadas entre as partes, em <strong>${escapeHtml(contract.paymentNotes || "-")}</strong>.
-        </p>
-        <p>2.2. As partes declaram estar plenamente cientes e de acordo com a forma de pagamento estabelecida, comprometendo-se ao fiel cumprimento das obrigações financeiras assumidas.</p>
+        <h2>DO PRAZO E DA FORMA DE PAGAMENTO</h2>
+        <p>2.1. O pagamento deverá ser realizado impreterivelmente até o vencimento da ordem gerada pelo sistema, via TED, PIX ou depósito, na forma ajustada entre as partes.</p>
+        <p>VALOR TOTAL: <strong>${formatCurrency(contract.amountValue)}${contract.amountText ? ` (${escapeHtml(contract.amountText)})` : ""}</strong><br />FORMA DE PAGAMENTO: <strong>${escapeHtml(contract.paymentMethod || "-")}</strong><br />CONDIÇÕES: <strong>${escapeHtml(contract.paymentNotes || "-")}</strong></p>
       </section>
 
       <section class="contract-section">
-        <h2>CLÁUSULA TERCEIRA - DA ENTREGA DO VEÍCULO</h2>
-        <p>
-          3. O VENDEDOR compromete-se a disponibilizar e entregar o veículo objeto deste contrato ao COMPRADOR até o dia
-          <strong>${escapeHtml(formatDateLong(contract.deliveryDate) || "-")}</strong>
-          e no endereço: <strong>${escapeHtml(contract.deliveryAddress || "-")}</strong>.
-        </p>
-        <p>3.1. No ato da entrega, deverão ser disponibilizados ao COMPRADOR o veículo, suas respectivas chaves, chave reserva, manual e demais documentos que tenham sido expressamente incluídos na presente negociação.</p>
-        <p>3.2. A entrega deverá ocorrer de maneira que permita ao COMPRADOR receber o veículo nas condições declaradas neste instrumento.</p>
+        <h2>DAS OBRIGAÇÕES E PENDÊNCIAS</h2>
+        <p>3.1. O VENDEDOR compromete-se a entregar ao COMPRADOR o documento de registro do veículo, devidamente assinado e com as formalidades legais, no ato da entrega do bem.</p>
+        <p>3.2. A transferência da propriedade será de responsabilidade do COMPRADOR, que arcará com os custos de regularização documental. O valor das despesas de documentação e processamento administrativo será de <strong>${documentationAmount}</strong>. A taxa administrativa e afins serão apuradas proporcionalmente, observando o valor promocional vigente do veículo adquirido e os critérios internos da empresa.</p>
+        <p>3.3. O veículo será entregue em perfeitas condições e possui garantia de 6 (seis) meses de motor e câmbio. O veículo corresponde às respectivas fotos e aos anúncios publicitários divulgados pela empresa.</p>
+        <p>3.4. O prazo de entrega será estabelecido pelo VENDEDOR conforme a demanda da empresa.${contract.deliveryDate ? ` Previsão informada: <strong>${escapeHtml(formatDateLong(contract.deliveryDate))}</strong>.` : ""}${contract.deliveryAddress ? ` Endereço de entrega informado: <strong>${escapeHtml(contract.deliveryAddress)}</strong>.` : ""}</p>
       </section>
 
       <section class="contract-section">
-        <h2>CLÁUSULA QUARTA - DAS DECLARAÇÕES E RESPONSABILIDADES DO VENDEDOR</h2>
-        <p>4.1. O VENDEDOR declara, sob sua responsabilidade, que possui legitimidade para realizar a presente negociação e que o veículo objeto deste contrato será entregue livre e desembaraçado de ônus, restrições, gravames, débitos ou impedimentos legais não previamente informados ao COMPRADOR.</p>
-        <p>4.2. Caso seja constatada a existência de débito, restrição ou impedimento anterior à entrega do veículo e que seja de responsabilidade do VENDEDOR, caberá a este providenciar sua regularização, ressalvadas as situações expressamente informadas e aceitas pelo COMPRADOR por escrito.</p>
-        <p>4.3. O VENDEDOR responsabiliza-se pela veracidade das informações e declarações prestadas neste instrumento relativas ao veículo e à presente negociação.</p>
+        <h2>DA RESCISÃO, DESISTÊNCIA E MULTA</h2>
+        <p>4.1. Em caso de atraso no pagamento de qualquer parcela, incidirá multa moratória de 2% (dois por cento) sobre o valor da parcela em atraso, acrescida de juros de mora de 1% (um por cento) ao mês, calculados proporcionalmente ao período de atraso, desde o vencimento até a quitação.</p>
+        <p>4.2. O inadimplemento de qualquer obrigação assumida neste contrato facultará ao VENDEDOR considerá-lo rescindido de pleno direito, independentemente de notificação judicial, podendo promover a retomada do veículo, sem prejuízo da cobrança de multa compensatória de 30% (trinta por cento) sobre o valor total do contrato, além das parcelas vencidas, juros, multas e demais encargos devidos.</p>
       </section>
 
       <section class="contract-section">
-        <h2>CLÁUSULA QUINTA - DAS DECLARAÇÕES E RESPONSABILIDADES DO COMPRADOR</h2>
-        <p>5. O COMPRADOR declara ter conhecimento das características e do estado de conservação do veículo objeto da presente compra e venda, aceitando-o nas condições expressamente informadas neste contrato, sem prejuízo das responsabilidades legais aplicáveis.</p>
-        <p>5.2. O COMPRADOR compromete-se a cumprir integralmente as obrigações de pagamento assumidas neste instrumento, nos valores, prazos e condições estabelecidos entre as partes.</p>
+        <h2>DAS DISPOSIÇÕES GERAIS</h2>
+        <p>5.1. Em caso de falecimento de qualquer das partes, seus herdeiros deverão cumprir o contrato até sua conclusão.</p>
+        <p>5.2. As partes declaram que leram e compreenderam todas as cláusulas, aceitando os termos deste instrumento.</p>
       </section>
 
       <section class="contract-section">
-        <h2>CLÁUSULA SEXTA - DA DOCUMENTAÇÃO E TRANSFERÊNCIA</h2>
-        <p>6.1. As partes comprometem-se a fornecer e assinar os documentos necessários à regularização e transferência do veículo perante os órgãos competentes, observadas as exigências previstas na legislação aplicável.</p>
-        <p>6.2. Eventuais multas, tributos, taxas, encargos ou débitos incidentes sobre o veículo deverão ser atribuídos à parte responsável de acordo com a data do fato gerador e com as disposições legais aplicáveis, salvo ajuste escrito em sentido diverso.</p>
-      </section>
-
-      <section class="contract-section">
-        <h2>CLÁUSULA SÉTIMA - DO INADIMPLEMENTO</h2>
-        <p>7.1. O descumprimento de qualquer obrigação prevista neste contrato sujeitará a parte inadimplente às consequências previstas neste instrumento e na legislação aplicável.</p>
-        <p>7.2. Eventual tolerância de uma das partes quanto ao descumprimento de qualquer obrigação pela outra não será considerada renúncia de direito, alteração contratual ou novação, permanecendo válidas e exigíveis as demais disposições deste instrumento.</p>
-      </section>
-
-      <section class="contract-section">
-        <h2>CLÁUSULA OITAVA - DA IRREVOGABILIDADE E DO COMPROMISSO ENTRE AS PARTES</h2>
-        <p>8.1. O presente instrumento representa o acordo firmado entre as partes acerca da compra e venda aqui descrita, obrigando-as ao cumprimento das condições assumidas, ressalvadas as hipóteses de rescisão ou revisão admitidas pela legislação aplicável.</p>
-        <p>8.2. Qualquer alteração das condições deste contrato deverá ser formalizada por escrito e aceita pelas partes.</p>
-      </section>
-
-      <section class="contract-section">
-        <h2>CLÁUSULA NONA - DO FORO</h2>
-        <p>9.1. Observadas as regras legais aplicáveis à competência territorial, fica eleito o Foro da Comarca de São Paulo/SP para dirimir eventuais controvérsias decorrentes deste contrato, ressalvadas as hipóteses em que a legislação determine foro diverso.</p>
+        <h2>DO FORO</h2>
+        <p>6.1. Fica eleito o foro da Comarca de São Paulo/SP para dirimir dúvidas ou litígios decorrentes deste contrato, podendo o VENDEDOR optar por outro foro, caso assim deseje.</p>
       </section>
 
       <section class="contract-section contract-section--signatures">
-        <p>E, por estarem justas e contratadas, as partes firmam o presente instrumento em 02 (DUAS) vias de igual teor e forma, juntamente com as testemunhas abaixo, para que produza seus jurídicos e legais efeitos.</p>
         <p class="contract-place">${COMPANY.city.toUpperCase()} - ${COMPANY.state}, <strong>${escapeHtml(formatDateLong(contract.createdAt || new Date()))}</strong>.</p>
 
         <div class="contract-signature-grid">

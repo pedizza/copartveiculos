@@ -20,12 +20,18 @@ const serializeContract = (row) => {
     clientName: row.client_name,
     clientEmail: row.client_email,
     clientCpf: row.client_cpf,
+    clientPhone: row.client_phone,
+    clientRg: row.client_rg,
     clientAddress: row.client_address,
     vehicleName: row.vehicle_name,
     vehicleModel: row.vehicle_model,
     vehicleYear: row.vehicle_year,
+    vehicleColor: row.vehicle_color,
+    vehiclePlate: row.vehicle_plate,
+    vehicleRenavam: row.vehicle_renavam,
     vehicleDescription: row.vehicle_description,
     amountValue: Number(row.amount_value || 0),
+    documentationValue: row.documentation_value === null || row.documentation_value === undefined ? null : Number(row.documentation_value),
     amountText: row.amount_text,
     paymentMethod: row.payment_method,
     paymentNotes: row.payment_notes,
@@ -68,12 +74,18 @@ const persistContractChangesByPublicToken = async (publicToken, changes) => {
   pushField("client_name", changes.clientName);
   pushField("client_email", changes.clientEmail);
   pushField("client_cpf", changes.clientCpf);
+  pushField("client_phone", changes.clientPhone);
+  pushField("client_rg", changes.clientRg);
   pushField("client_address", changes.clientAddress);
   pushField("vehicle_name", changes.vehicleName);
   pushField("vehicle_model", changes.vehicleModel);
   pushField("vehicle_year", changes.vehicleYear);
+  pushField("vehicle_color", changes.vehicleColor);
+  pushField("vehicle_plate", changes.vehiclePlate);
+  pushField("vehicle_renavam", changes.vehicleRenavam);
   pushField("vehicle_description", changes.vehicleDescription);
   pushField("amount_value", changes.amountValue);
+  pushField("documentation_value", changes.documentationValue);
   pushField("amount_text", changes.amountText);
   pushField("payment_method", changes.paymentMethod);
   pushField("payment_notes", changes.paymentNotes);
@@ -119,11 +131,17 @@ export const ensureContractSchema = async () => {
         client_name text not null,
         client_email text,
         client_cpf text,
+        client_phone text,
+        client_rg text,
         client_address text,
         vehicle_name text,
         vehicle_model text,
         vehicle_year text,
+        vehicle_color text,
+        vehicle_plate text,
+        vehicle_renavam text,
         amount_value numeric(12, 2) not null default 0,
+        documentation_value numeric(12, 2),
         amount_text text,
         payment_method text,
         payment_notes text,
@@ -146,6 +164,12 @@ export const ensureContractSchema = async () => {
       create index if not exists app_contracts_owner_idx on public.app_contracts(owner_id);
 
       alter table public.app_contracts add column if not exists vehicle_description text;
+      alter table public.app_contracts add column if not exists client_phone text;
+      alter table public.app_contracts add column if not exists client_rg text;
+      alter table public.app_contracts add column if not exists vehicle_color text;
+      alter table public.app_contracts add column if not exists vehicle_plate text;
+      alter table public.app_contracts add column if not exists vehicle_renavam text;
+      alter table public.app_contracts add column if not exists documentation_value numeric(12,2);
       alter table public.app_contracts add column if not exists seller_signature_hash text;
       alter table public.app_contracts add column if not exists client_signature_hash text;
 
@@ -200,12 +224,18 @@ export const createContract = async ({
   clientName,
   clientEmail = null,
   clientCpf = null,
+  clientPhone = null,
+  clientRg = null,
   clientAddress = null,
   vehicleName = null,
   vehicleModel = null,
   vehicleYear = null,
+  vehicleColor = null,
+  vehiclePlate = null,
+  vehicleRenavam = null,
   vehicleDescription = null,
   amountValue = 0,
+  documentationValue = null,
   amountText = null,
   paymentMethod = null,
   paymentNotes = null,
@@ -222,16 +252,16 @@ export const createContract = async ({
   const { rows } = await pool.query(
     `
       insert into public.app_contracts (
-        contract_type, public_token, client_user_id, client_name, client_email, client_cpf, client_address,
-        vehicle_name, vehicle_model, vehicle_year, amount_value, amount_text, payment_method, payment_notes,
+        contract_type, public_token, client_user_id, client_name, client_email, client_cpf, client_phone, client_rg, client_address,
+        vehicle_name, vehicle_model, vehicle_year, vehicle_color, vehicle_plate, vehicle_renavam, amount_value, documentation_value, amount_text, payment_method, payment_notes,
         delivery_date, delivery_address, seller_name, seller_signature_text, seller_signature_style, seller_signed_at,
         seller_signature_hash, status, vehicle_description, owner_id
       )
       values (
-        $1,$2,$3,$4,$5,$6,$7,
-        $8,$9,$10,$11,$12,$13,$14,
-        $15,$16,$17,$18,$19,timezone('utc', now()),
-        $20,$21,$22,$23
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,
+        $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+        $21,$22,$23,$24,$25,timezone('utc', now()),
+        $26,$27,$28,$29
       )
       returning *
     `,
@@ -242,11 +272,17 @@ export const createContract = async ({
       clientName,
       clientEmail,
       clientCpf,
+      clientPhone,
+      clientRg,
       clientAddress,
       vehicleName,
       vehicleModel,
       vehicleYear,
+      vehicleColor,
+      vehiclePlate,
+      vehicleRenavam,
       amountValue,
+      documentationValue,
       amountText,
       paymentMethod,
       paymentNotes,
