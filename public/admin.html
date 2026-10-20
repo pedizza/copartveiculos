@@ -129,7 +129,7 @@
             <div class="admin-tab-panel" data-tab-panel="staff">
               <section class="admin-section"><article class="admin-card">
                 <span class="eyebrow">Equipe</span><h2>Usuários</h2>
-                <p>Funcionários gerenciam seus próprios clientes, contratos, rastreios e faturas. Veículos, motoristas e pátios são compartilhados.</p>
+                <p>Funcionários gerenciam seus próprios clientes, contratos e faturas. Podem criar rastreios para qualquer cliente cadastrado e excluir somente os rastreios que criaram. Veículos, motoristas e pátios são compartilhados.</p>
                 <form id="staffForm" class="admin-form admin-form--grid">
                   <label><span>Nome do funcionário</span><input name="fullName" required maxlength="150" autocomplete="name" /></label>
                   <label><span>E-mail de acesso</span><input name="email" type="email" required autocomplete="off" /></label>
@@ -141,6 +141,7 @@
               </article></section>
             </div>
             <div class="admin-tab-panel is-active" data-tab-panel="overview">
+              <p id="staffViewNotice" class="admin-panel-copy hidden" role="status"></p>
               <article class="admin-card admin-card--welcome">
                 <div class="admin-card__head">
                   <div>
@@ -1074,12 +1075,12 @@
       const buildClientAddress = fullAddress;
 
       const syncTrackingDestination = () => {
-        const selectedClient = currentAdminData.users.find((user) => user.id === trackingClientSelect.value);
+        const selectedClient = currentAdminData.trackingClients.find((user) => user.id === trackingClientSelect.value);
         trackingDestinationPreview.value = buildClientAddress(selectedClient) || "Destino não disponível";
       };
 
       const renderTrackingSelects = () => {
-        const users = customerUsers();
+        const users = currentAdminData.trackingClients;
 
         trackingClientSelect.innerHTML = users.length
           ? `<option value="">Selecione um cliente</option>${users
@@ -1490,6 +1491,7 @@
               <p>Alerta: ${escapeTrackingText(tracking.alert_message || tracking.status || "-")}</p>
               <p>${tracking.driver_name || "Sem motorista"} • ${tracking.yard_name || "Sem pátio"}</p>
               <a class="button button-secondary" href="./rastreio.html?preview=${encodeURIComponent(tracking.id)}" target="_blank" rel="noopener">Ver como cliente</a>
+              <button class="button button-secondary admin-card-action--danger" type="button" data-delete-tracking="${tracking.id}">Excluir rastreio</button>
               <form class="admin-tracking-status-form" data-update-tracking="${tracking.id}">
                 <label><span>Alterar status</span><input name="status" list="trackingStatusSuggestions" maxlength="120" required aria-label="Novo status do rastreio" placeholder="Selecione ou escreva um status" /></label>
                 <label><span>Localização informada (endereço ou cidade)</span><input name="currentLocation" type="text" maxlength="500" placeholder="Informe o local atual" /></label>
@@ -1531,6 +1533,16 @@
             finally { button.disabled = false; }
           });
         });
+        trackingsList.querySelectorAll("[data-delete-tracking]").forEach(button => button.addEventListener("click", async () => {
+          const tracking=trackings.find(item=>item.id===button.dataset.deleteTracking);
+          if(!tracking||!window.confirm(`Excluir o rastreio ${tracking.tracking_code}? Esta ação não pode ser desfeita.`))return;
+          button.disabled=true;
+          try{
+            await adminFetch("/api/admin?action=trackings",{method:"DELETE",body:JSON.stringify({id:tracking.id})});
+            currentAdminData.trackings=currentAdminData.trackings.filter(item=>item.id!==tracking.id);
+            renderTrackings(currentAdminData.trackings);renderStats(currentAdminData);
+          }catch(error){button.disabled=false;window.alert(error.message||"Não foi possível excluir o rastreio.");}
+        }));
       };
 
       const renderInvoices = (invoices) => {
@@ -1803,6 +1815,7 @@
       };
 
       let staffUsers = [];
+      let selectedStaffId = "";
       const ownerLabel = record => {
         if (currentAdminData.actor?.role !== "admin") return "";
         const id = record.owner_id || record.ownerId;
@@ -1817,6 +1830,18 @@
           const card = document.createElement("article"); card.className = "admin-list-item";
           const title = document.createElement("strong"); title.textContent = user.full_name;
           const info = document.createElement("p"); info.textContent = `${user.email} • ${user.is_active ? "Ativo" : "Desativado"}`;
+          const view = document.createElement("button"); view.type="button"; view.className="button button-primary"; view.textContent=selectedStaffId===user.id?"Painel aberto":"Ver painel do funcionário";
+          view.disabled=selectedStaffId===user.id;
+          view.addEventListener("click",async()=>{
+            selectedStaffId=user.id;
+            const notice=document.getElementById("staffViewNotice");
+            notice.classList.remove("hidden");notice.replaceChildren();
+            const label=document.createElement("span");label.textContent=`Visualizando clientes, rastreios, contratos e faturas de ${user.full_name}. `;
+            const back=document.createElement("button");back.type="button";back.className="button button-secondary";back.textContent="Voltar ao painel geral";
+            back.addEventListener("click",async()=>{selectedStaffId="";notice.classList.add("hidden");await reloadScopedDashboard();renderStaff();});
+            notice.append(label,back);renderStaff();
+            await reloadScopedDashboard();activateTab("overview");
+          });
           const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "button button-secondary"; toggle.textContent = user.is_active ? "Desativar acesso" : "Ativar acesso";
           const password = document.createElement("input"); password.type = "password"; password.minLength=8; password.autocomplete="new-password"; password.placeholder="Nova senha (mínimo 8 caracteres)"; password.setAttribute("aria-label",`Nova senha de ${user.full_name}`);
           const reset = document.createElement("button"); reset.type="button"; reset.className="button button-secondary"; reset.textContent="Alterar senha";
@@ -1828,7 +1853,7 @@
           };
           toggle.addEventListener("click",()=>save({isActive:!user.is_active}));
           reset.addEventListener("click",()=>{if(password.value.length<8){setStatus(message,"Use pelo menos 8 caracteres.",true);return;}save({password:password.value});});
-          card.append(title,info,toggle,password,reset,message);target.append(card);
+          card.append(title,info,view,toggle,password,reset,message);target.append(card);
         }
       };
       document.getElementById("staffForm").addEventListener("submit",async event=>{
@@ -1863,21 +1888,35 @@
         renderContracts(currentAdminData.contracts || []);
       };
 
+      const scopedAdminUrl = url => {
+        if (!selectedStaffId) return url;
+        const separator=url.includes("?")?"&":"?";
+        return `${url}${separator}staffId=${encodeURIComponent(selectedStaffId)}`;
+      };
+      const reloadScopedDashboard = async () => {
+        const data = await adminFetch(scopedAdminUrl("/api/admin/dashboard"));
+        const [invoiceData,contractData]=await Promise.all([
+          adminFetch(scopedAdminUrl("/api/admin/invoices")),
+          adminFetch(scopedAdminUrl("/api/admin?action=contracts"))
+        ]);
+        data.invoices=invoiceData.invoices||[];data.contracts=contractData.contracts||[];
+        renderDashboard(data);
+      };
       const loadDashboard = async () => {
-        const data = await adminFetch("/api/admin/dashboard");
+        const data = await adminFetch(scopedAdminUrl("/api/admin/dashboard"));
         staffUsers = data.actor?.role === "admin" ? (await adminFetch("/api/admin?action=staff")).staff : [];
         renderStaff();
         renderDashboard(data);
       };
 
       const loadInvoices = async () => {
-        const data = await adminFetch("/api/admin/invoices");
+        const data = await adminFetch(scopedAdminUrl("/api/admin/invoices"));
         currentAdminData.invoices = data.invoices || [];
         renderInvoices(currentAdminData.invoices);
       };
 
       const loadContracts = async () => {
-        const data = await adminFetch("/api/admin?action=contracts");
+        const data = await adminFetch(scopedAdminUrl("/api/admin?action=contracts"));
         currentAdminData.contracts = data.contracts || [];
         renderContracts(currentAdminData.contracts);
       };
@@ -2419,7 +2458,7 @@
 
         try {
           const formData = new FormData(trackingForm);
-          const client = currentAdminData.users.find((user) => user.id === formData.get("clientUserId"));
+          const client = currentAdminData.trackingClients.find((user) => user.id === formData.get("clientUserId"));
           const item = currentAdminData.catalogItems.find((catalogItem) => catalogItem.id === formData.get("catalogItemId"));
           const selectedLocationYard =
             currentAdminData.yards.find((yard) => yard.id === formData.get("currentLocationYardId")) ||

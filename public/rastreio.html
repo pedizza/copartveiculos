@@ -402,7 +402,7 @@
         const received = tracking.animation_received_at ?? performance.now();
         const elapsed = Number.isFinite(serverNow) && Number.isFinite(started)
           ? Math.max(0, serverNow - started + performance.now() - received) : 0;
-        return stored >= 0.5 ? stored : Math.min(0.5, stored + elapsed / 7200000);
+        return stored >= 0.5 ? stored : Math.min(0.5, stored + elapsed / 28800000);
       };
       const stampTimelines = data => {
         data.trackings.forEach(tracking => { tracking.animation_received_at = performance.now(); });

@@ -241,17 +241,18 @@ export const ensureDefaultCatalogItems = async () => {
   return defaultCatalogPromise;
 };
 
-export const getAdminDashboardData = async (ownerId = null) => {
+export const getAdminDashboardData = async (ownerId = null, { trackingOwnerId = ownerId } = {}) => {
   await ensureAdminSchema();
   await ensureContractSchema();
 
-  const [users, catalogItems, drivers, yards, trackings, contracts, contractsTotal] = await Promise.all([
+  const [users, trackingClients, catalogItems, drivers, yards, trackings, contracts, contractsTotal] = await Promise.all([
     pool.query(`
       select id, full_name, email, whatsapp, cpf, address, number, complement, district, cep, city, state, role, created_at, owner_id, (select full_name from public.app_users owner where owner.id=app_users.owner_id) as owner_name
       from public.app_users
       where role='customer' and ($1::uuid is null or owner_id=$1)
       order by created_at desc
     `, [ownerId]),
+    pool.query(`select id,full_name,email,address,number,complement,district,cep,city,state from public.app_users where role='customer' order by full_name`),
     pool.query(`
       select id, title, slug, category, sections, price, location, year_label, image_url, gallery_images, badge, gallery_count, description, is_published, created_at
       from public.app_catalog_items
@@ -293,13 +294,14 @@ export const getAdminDashboardData = async (ownerId = null) => {
       left join public.app_yards y on y.id = t.yard_id
       where ($1::uuid is null or t.owner_id=$1)
       order by t.created_at desc
-    `, [ownerId]),
+    `, [trackingOwnerId]),
     listContracts({ limit: 5, ownerId }),
     countContracts(ownerId)
   ]);
 
   return {
     users: users.rows,
+    trackingClients: trackingClients.rows,
     catalogItems: catalogItems.rows,
     drivers: drivers.rows,
     yards: yards.rows,
@@ -787,6 +789,12 @@ export const updateTrackingStatus = async ({ id, status, currentLocation, animat
     where id = $1
     returning *
   `, [id, status, ["Aguardando nota fiscal", "Em separação", "Em andamento", "Em rota de entrega", "Entregue"], currentLocation ?? null, animationPaused ?? null]);
+  return rows[0] || null;
+};
+
+export const deleteTrackingById = async (id) => {
+  await ensureAdminSchema();
+  const { rows } = await pool.query("delete from public.app_client_tracking where id=$1 returning id", [id]);
   return rows[0] || null;
 };
 

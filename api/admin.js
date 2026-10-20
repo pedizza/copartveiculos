@@ -15,6 +15,7 @@ import {
   createYard,
   updateYard,
   deleteCatalogItem,
+  deleteTrackingById,
   ensureDefaultAdminUser,
   getAdminDashboardData,
   updateCatalogItem,
@@ -192,7 +193,14 @@ export default async function handler(req, res) {
     }
 
     await Promise.all([ensureContractSchema(), ensureInvoiceSchema()]);
-    const scope = ownerScope(admin);
+    const requestedStaffId = String(getQueryParam(req, "staffId") || "").trim();
+    if (requestedStaffId && admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode abrir o painel de um funcionário."});
+    let scope = ownerScope(admin);
+    if (requestedStaffId) {
+      const {rows} = await pool.query("select id from public.app_users where id=$1 and role='employee'", [requestedStaffId]);
+      if (!rows[0]) return sendJson(req,res,404,{message:"Funcionário não encontrado."});
+      scope = rows[0].id;
+    }
     if (action === "staff") {
       if (admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode gerenciar funcionários."});
       if (req.method === "GET") return sendJson(req,res,200,{staff:await listStaff()});
@@ -223,7 +231,7 @@ export default async function handler(req, res) {
         return sendJson(req, res, 405, { message: "Método não permitido." });
       }
 
-      const data = await getAdminDashboardData(scope);
+      const data = await getAdminDashboardData(scope, { trackingOwnerId: scope });
       data.company = COMPANY;
       data.actor = sanitizeUser(admin);
       return sendJson(req, res, 200, data);
@@ -454,6 +462,16 @@ export default async function handler(req, res) {
     }
 
     if (action === "trackings") {
+      if (req.method === "DELETE") {
+        const { id } = await readJsonBody(req);
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id || ""))) {
+          return sendJson(req,res,400,{message:"Rastreio inválido."});
+        }
+        await assertOwned(admin,"trackings",id);
+        const deleted = await deleteTrackingById(id);
+        if (!deleted) return sendJson(req,res,404,{message:"Rastreio não encontrado."});
+        return sendJson(req,res,200,{success:true,id:deleted.id});
+      }
       if (req.method === "PUT") {
         const { id, status: rawStatus, currentLocation, animationPaused } = await readJsonBody(req);
         const status = typeof rawStatus === "string" ? rawStatus.trim() : "";
@@ -492,8 +510,11 @@ export default async function handler(req, res) {
         return sendJson(req, res, 400, { message: "Cliente, item e código de rastreio são obrigatórios." });
       }
 
-      await assertOwned(admin,"customers",clientUserId);
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(clientUserId || ""))) {
+        return sendJson(req,res,400,{message:"Selecione um cliente válido."});
+      }
       const trackingClient = await findUserById(clientUserId);
+      if (!trackingClient || trackingClient.role !== "customer") return sendJson(req,res,404,{message:"Cliente não encontrado."});
       const tracking = await createTracking({
         ownerId: admin.id,
         clientUserId,

@@ -1,4 +1,4 @@
--- Shared demonstration timeline: two hours per full route, capped at halfway.
+-- Shared demonstration timeline: eight hours per full route, capped at halfway.
 -- Client devices read this state; only admin status/motion controls change it.
 alter table public.app_client_tracking
   add column if not exists animation_paused boolean,
@@ -26,7 +26,7 @@ begin
     progress_value := OLD.animation_progress;
     already_started := OLD.animation_running_since is not null or progress_value > 0;
     if OLD.animation_running_since is not null and progress_value < 0.5 then
-      progress_value := least(0.5, progress_value + greatest(0, extract(epoch from (now() - OLD.animation_running_since))) / 7200.0);
+      progress_value := least(0.5, progress_value + greatest(0, extract(epoch from (now() - OLD.animation_running_since))) / 28800.0);
     end if;
   end if;
   if lower(trim(NEW.status)) = 'entregue' then progress_value := 1; end if;

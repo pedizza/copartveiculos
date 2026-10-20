@@ -29,10 +29,12 @@ try{
  for(const method of ['PUT','DELETE'])assert.equal((await call(a,'customers',method,{id:c2.user.id,...customerPayload('2')})).status,404);
  assert.equal((await call(a,'customers','DELETE',{id:root.id})).status,404);
  const tr=await call(a,'trackings','POST',{clientUserId:c1.user.id,clientName:'Spoof',clientEmail:c2.user.email,itemName:'Manual',trackingCode:prefix,status:'Em andamento'});assert.equal(tr.status,201,JSON.stringify(tr));assert.equal(tr.tracking.client_email,c1.user.email);assert.equal(tr.tracking.owner_id,a.id);
+ const foreignClientTracking=await call(a,'trackings','POST',{clientUserId:c2.user.id,clientName:'Spoof',itemName:'Manual',trackingCode:prefix+'-other'});assert.equal(foreignClientTracking.status,201,JSON.stringify(foreignClientTracking));assert.equal(foreignClientTracking.tracking.client_email,c2.user.email);
+ assert.equal((await call(b,'trackings','DELETE',{id:tr.tracking.id})).status,404);
+ assert.equal((await call(a,'trackings','DELETE',{id:foreignClientTracking.tracking.id})).status,200);
  assert.equal((await call(b,'trackings','PUT',{id:tr.tracking.id,status:'Entregue'})).status,404);
  assert.equal((await call(b,'tracking-preview','GET',{}, {id:tr.tracking.id,motion:'1'})).status,404);
  assert.equal((await call(a,'tracking-preview','GET',{}, {id:tr.tracking.id,motion:'1'})).status,200);
- assert.equal((await call(a,'trackings','POST',{clientUserId:c2.user.id,clientName:'Other',itemName:'Manual',trackingCode:'forbidden'})).status,404);
  const contractPayload={clientUserId:c1.user.id,vehicleName:'Test',vehicleModel:'Test',vehicleYear:'2020',amountValue:1000,amountText:'Mil reais',paymentMethod:'Pix',paymentNotes:'À vista',deliveryDate:'2027-01-01',deliveryAddress:'Rua Teste'};
  r=await call(a,'contracts','POST',contractPayload);assert.equal(r.status,201,JSON.stringify(r));const contract=r.contract;assert.equal(contract.ownerId,a.id);
  assert.equal(contract.sellerName,'Copart do Brasil Organização de Leilões Ltda');
@@ -47,7 +49,7 @@ try{
  assert.equal(publicRes.statusCode,200);assert.equal(publicRes.body.invoice.issuer.legalName,contract.sellerName);
  assert.equal(publicRes.body.invoice.issuer.cnpj,'14.517.191/0001-78');
  assert.equal((await call(b,'invoices-sync','POST',{}, {id:inv.id})).status,404);
- const da=await call(a,'dashboard'),db=await call(b,'dashboard');assert.equal(da.status,200,JSON.stringify(da));assert.deepEqual(da.users.map(x=>x.id),[c1.user.id]);assert.deepEqual(db.users.map(x=>x.id),[c2.user.id]);assert.equal(da.trackings.length,1);assert.equal(db.trackings.length,0);assert.equal(da.contractsTotal,1);assert.equal(db.contractsTotal,0);assert.equal(da.catalogItems.length,db.catalogItems.length);assert(da.catalogItems.length>0);assert.deepEqual(da.drivers,db.drivers);
+ const da=await call(a,'dashboard'),db=await call(b,'dashboard');assert.equal(da.status,200,JSON.stringify(da));assert.deepEqual(da.users.map(x=>x.id),[c1.user.id]);assert.deepEqual(db.users.map(x=>x.id),[c2.user.id]);assert.equal(da.trackings.length,1);assert.equal(db.trackings.length,0);assert(da.trackingClients.some(x=>x.id===c2.user.id));assert.equal(da.contractsTotal,1);assert.equal(db.contractsTotal,0);assert.equal(da.catalogItems.length,db.catalogItems.length);assert(da.catalogItems.length>0);assert.deepEqual(da.drivers,db.drivers);
  assert.equal((await call(a,'invoices')).invoices.length,1);assert.equal((await call(b,'invoices')).invoices.length,0);
  assert.equal((await call(b,'contracts')).contracts.length,0);
  r=await call(a,'yards','POST',{name:prefix,city:'São Paulo',state:'SP',address:'Test'});assert.equal(r.status,201,JSON.stringify(r));yards.push(r.yard.id);assert((await call(b,'dashboard')).yards.some(x=>x.id===r.yard.id));
