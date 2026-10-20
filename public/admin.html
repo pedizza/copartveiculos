@@ -1836,11 +1836,12 @@
             selectedStaffId=user.id;
             const notice=document.getElementById("staffViewNotice");
             notice.classList.remove("hidden");notice.replaceChildren();
-            const label=document.createElement("span");label.textContent=`Visualizando clientes, rastreios, contratos e faturas de ${user.full_name}. `;
+            const label=document.createElement("span");label.textContent=`Carregando painel de ${user.full_name}... `;
             const back=document.createElement("button");back.type="button";back.className="button button-secondary";back.textContent="Voltar ao painel geral";
             back.addEventListener("click",async()=>{selectedStaffId="";notice.classList.add("hidden");await reloadScopedDashboard();renderStaff();});
-            notice.append(label,back);renderStaff();
-            await reloadScopedDashboard();activateTab("overview");
+            notice.append(label,back);renderStaff();activateTab("overview");
+            try{await reloadScopedDashboard();label.textContent=`Visualizando clientes, rastreios, contratos e faturas de ${user.full_name}. `;}
+            catch(error){label.textContent=`Não foi possível carregar o painel de ${user.full_name}: ${error.message} `;}
           });
           const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "button button-secondary"; toggle.textContent = user.is_active ? "Desativar acesso" : "Ativar acesso";
           const password = document.createElement("input"); password.type = "password"; password.minLength=8; password.autocomplete="new-password"; password.placeholder="Nova senha (mínimo 8 caracteres)"; password.setAttribute("aria-label",`Nova senha de ${user.full_name}`);
@@ -1895,11 +1896,7 @@
       };
       const reloadScopedDashboard = async () => {
         const data = await adminFetch(scopedAdminUrl("/api/admin/dashboard"));
-        const [invoiceData,contractData]=await Promise.all([
-          adminFetch(scopedAdminUrl("/api/admin/invoices")),
-          adminFetch(scopedAdminUrl("/api/admin?action=contracts"))
-        ]);
-        data.invoices=invoiceData.invoices||[];data.contracts=contractData.contracts||[];
+        data.invoices=data.invoices||[];data.contracts=data.contracts||[];
         renderDashboard(data);
       };
       const loadDashboard = async () => {

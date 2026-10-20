@@ -232,6 +232,14 @@ export default async function handler(req, res) {
       }
 
       const data = await getAdminDashboardData(scope, { trackingOwnerId: scope });
+      if (requestedStaffId) {
+        const [invoices, contracts] = await Promise.all([
+          listInvoices(scope),
+          listContracts({ownerId:scope})
+        ]);
+        data.invoices = invoices.map(normalizeInvoicePayload);
+        data.contracts = contracts.map(normalizeContractPayload);
+      }
       data.company = COMPANY;
       data.actor = sanitizeUser(admin);
       return sendJson(req, res, 200, data);
