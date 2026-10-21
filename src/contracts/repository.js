@@ -30,6 +30,7 @@ const serializeContract = (row) => {
     vehiclePlate: row.vehicle_plate,
     vehicleRenavam: row.vehicle_renavam,
     vehicleDescription: row.vehicle_description,
+    vehicles: Array.isArray(row.vehicles) ? row.vehicles : [],
     amountValue: Number(row.amount_value || 0),
     documentationValue: row.documentation_value === null || row.documentation_value === undefined ? null : Number(row.documentation_value),
     amountText: row.amount_text,
@@ -169,6 +170,7 @@ export const ensureContractSchema = async () => {
       alter table public.app_contracts add column if not exists vehicle_color text;
       alter table public.app_contracts add column if not exists vehicle_plate text;
       alter table public.app_contracts add column if not exists vehicle_renavam text;
+      alter table public.app_contracts add column if not exists vehicles jsonb not null default '[]'::jsonb;
       alter table public.app_contracts add column if not exists documentation_value numeric(12,2);
       alter table public.app_contracts add column if not exists seller_signature_hash text;
       alter table public.app_contracts add column if not exists client_signature_hash text;
@@ -234,6 +236,7 @@ export const createContract = async ({
   vehiclePlate = null,
   vehicleRenavam = null,
   vehicleDescription = null,
+  vehicles = [],
   amountValue = 0,
   documentationValue = null,
   amountText = null,
@@ -255,13 +258,13 @@ export const createContract = async ({
         contract_type, public_token, client_user_id, client_name, client_email, client_cpf, client_phone, client_rg, client_address,
         vehicle_name, vehicle_model, vehicle_year, vehicle_color, vehicle_plate, vehicle_renavam, amount_value, documentation_value, amount_text, payment_method, payment_notes,
         delivery_date, delivery_address, seller_name, seller_signature_text, seller_signature_style, seller_signed_at,
-        seller_signature_hash, status, vehicle_description, owner_id
+        seller_signature_hash, status, vehicle_description, owner_id, vehicles
       )
       values (
         $1,$2,$3,$4,$5,$6,$7,$8,$9,
         $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
         $21,$22,$23,$24,$25,timezone('utc', now()),
-        $26,$27,$28,$29
+        $26,$27,$28,$29,$30
       )
       returning *
     `,
@@ -293,7 +296,7 @@ export const createContract = async ({
       sellerSignatureStyle,
       sellerSignatureHash,
       status,
-      vehicleDescription, ownerId
+      vehicleDescription, ownerId, JSON.stringify(vehicles)
     ]
   );
 

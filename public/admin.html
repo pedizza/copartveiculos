@@ -492,34 +492,23 @@
                         <span>ENDEREÇO DO CLIENTE</span>
                         <textarea name="clientAddress" id="contractClientAddress" rows="3" required></textarea>
                       </label>
-                      <label class="admin-form__full"><span>SELECIONAR VEÍCULO DO CATÁLOGO</span><select id="contractCatalogSelect"><option value="">Preencher manualmente ou selecionar veículo</option></select></label>
+                      <div class="admin-form__full" id="contractVehicleList">
+                        <section class="admin-form admin-form--grid contract-vehicle-fields" data-contract-vehicle>
+                          <h3 class="admin-form__full" data-vehicle-heading>Veículo 1</h3>
+                          <label class="admin-form__full"><span>SELECIONAR VEÍCULO DO CATÁLOGO</span><select id="contractCatalogSelect" data-vehicle-field="catalog"><option value="">Preencher manualmente ou selecionar veículo</option></select></label>
+                          <label><span>NOME DO VEÍCULO / MÁQUINA</span><input type="text" id="contractVehicleName" data-vehicle-field="name" required /></label>
+                          <label><span>MARCA / MODELO</span><input type="text" id="contractVehicleModel" data-vehicle-field="model" required /></label>
+                          <label><span>ANO DE FABRICAÇÃO</span><input type="text" id="contractVehicleYear" data-vehicle-field="year" required /></label>
+                          <label><span>COR</span><input type="text" id="contractVehicleColor" data-vehicle-field="color" /></label>
+                          <label><span>PLACA</span><input type="text" id="contractVehiclePlate" data-vehicle-field="plate" /></label>
+                          <label><span>RENAVAM</span><input type="text" id="contractVehicleRenavam" data-vehicle-field="renavam" /></label>
+                          <label><span>VALOR DESTE VEÍCULO (OPCIONAL)</span><input type="text" inputmode="decimal" data-vehicle-field="price" placeholder="R$ 0,00" /></label>
+                          <label class="admin-form__full"><span>DESCRIÇÃO OPCIONAL DO VEÍCULO</span><textarea id="contractVehicleDescription" data-vehicle-field="description" rows="3"></textarea></label>
+                        </section>
+                      </div>
+                      <div class="admin-form__full admin-form__actions"><button class="button button-secondary" type="button" id="addContractVehicle">Adicionar outro veículo</button></div>
                       <label>
-                        <span>NOME DO VEÍCULO / MÁQUINA</span>
-                        <input type="text" name="vehicleName" id="contractVehicleName" required />
-                      </label>
-                      <label>
-                        <span>MARCA / MODELO</span>
-                        <input type="text" name="vehicleModel" id="contractVehicleModel" required />
-                      </label>
-                      <label>
-                        <span>ANO DE FABRICAÇÃO</span>
-                        <input type="text" name="vehicleYear" id="contractVehicleYear" required />
-                      </label>
-                      <label>
-                        <span>COR</span>
-                        <input type="text" name="vehicleColor" id="contractVehicleColor" />
-                      </label>
-                      <label>
-                        <span>PLACA</span>
-                        <input type="text" name="vehiclePlate" id="contractVehiclePlate" />
-                      </label>
-                      <label>
-                        <span>RENAVAM</span>
-                        <input type="text" name="vehicleRenavam" id="contractVehicleRenavam" />
-                      </label>
-                      <label class="admin-form__full"><span>DESCRIÇÃO OPCIONAL DO VEÍCULO</span><textarea name="vehicleDescription" id="contractVehicleDescription" rows="3"></textarea></label>
-                      <label>
-                        <span>VALOR DO VEÍCULO</span>
+                        <span>VALOR TOTAL DO CONTRATO</span>
                         <input type="text" inputmode="decimal" name="amountValue" id="contractAmountValue" placeholder="R$ 0,00" required />
                       </label>
                       <label>
@@ -829,9 +818,6 @@
       const contractClientEmail = document.getElementById("contractClientEmail");
       const contractClientRg = document.getElementById("contractClientRg");
       const contractClientAddress = document.getElementById("contractClientAddress");
-      const contractVehicleName = document.getElementById("contractVehicleName");
-      const contractVehicleModel = document.getElementById("contractVehicleModel");
-      const contractVehicleYear = document.getElementById("contractVehicleYear");
       const contractAmountValue = document.getElementById("contractAmountValue");
       const contractAmountText = document.getElementById("contractAmountText");
       const contractPaymentMethod = document.getElementById("contractPaymentMethod");
@@ -1668,8 +1654,7 @@
         contractDeliveryAddress.value = buildClientAddress(user) || "";
       };
 
-      const catalogSelect = document.getElementById("contractCatalogSelect");
-      const vehicleDescription = document.getElementById("contractVehicleDescription");
+      const contractVehicleList = document.getElementById("contractVehicleList");
       const installmentFields = document.getElementById("contractInstallments");
       const downPayment = document.getElementById("contractDownPayment");
       const installmentCount = document.getElementById("contractInstallmentCount");
@@ -1731,24 +1716,57 @@
         });
       });
       contractAmountValue.addEventListener("input", () => { contractAmountText.value = amountWords(contractAmountValue.value); });
-      const renderContractCatalog = () => {
-        const previous = catalogSelect.value;
-        catalogSelect.replaceChildren(new Option("Preencher manualmente ou selecionar veículo", ""));
-        currentAdminData.catalogItems.forEach(item => catalogSelect.add(new Option(item.title, item.id)));
-        catalogSelect.value = previous;
+      const vehicleBlocks = () => Array.from(contractVehicleList.querySelectorAll("[data-contract-vehicle]"));
+      const field = (block,name) => block.querySelector(`[data-vehicle-field="${name}"]`);
+      const syncContractTotalFromVehiclePrices = () => {
+        const prices=vehicleBlocks().map(block=>String(field(block,"price").value||"").trim());
+        if(!prices.every(Boolean))return;
+        const values=prices.map(parseBRL);
+        if(values.every(value=>Number.isFinite(value)&&value>0)){
+          const total=values.reduce((sum,value)=>sum+value,0);
+          contractAmountValue.value=formatBRL(total);contractAmountText.value=amountWords(total);
+        }
       };
-      catalogSelect.addEventListener("change", () => {
-        const item = currentAdminData.catalogItems.find(item => item.id === catalogSelect.value);
-        if (!item) return;
-        contractVehicleName.value = item.title || "";
-        contractVehicleModel.value = (item.title || "").replace(/\s*\d{4}(?:\/\d{4})?\s*$/, "").trim();
-        contractVehicleYear.value = item.year_label || item.yearLabel || "";
-        vehicleDescription.value = item.description || "";
-        contractAmountValue.value = Number(item.price) > 0 ? formatBRL(item.price) : "";
-        contractAmountText.value = Number(item.price) > 0 ? amountWords(item.price) : "";
+      const renderContractCatalog = () => vehicleBlocks().forEach(selectBlock => {
+        const select=field(selectBlock,"catalog"),previous=select.value;
+        select.replaceChildren(new Option("Preencher manualmente ou selecionar veículo", ""));
+        currentAdminData.catalogItems.forEach(item => select.add(new Option(item.title, item.id)));
+        select.value=previous;
       });
+      const addContractVehicle = document.getElementById("addContractVehicle");
+      addContractVehicle.addEventListener("click",()=>{
+        if(vehicleBlocks().length>=20){setStatus(contractStatus,"Um contrato pode conter até 20 veículos.",true);return;}
+        const block=vehicleBlocks()[0].cloneNode(true),index=vehicleBlocks().length+1;
+        block.querySelectorAll("[id]").forEach(element=>element.removeAttribute("id"));
+        block.querySelector("[data-vehicle-heading]").textContent=`Veículo ${index}`;
+        for(const name of ["name","model","year","color","plate","renavam","description","price"])field(block,name).value="";
+        field(block,"catalog").value="";
+        const remove=document.createElement("button");remove.type="button";remove.className="button button-secondary admin-form__full";remove.dataset.removeContractVehicle="";remove.textContent="Remover este veículo";
+        block.append(remove);contractVehicleList.append(block);renderContractCatalog();
+      });
+      contractVehicleList.addEventListener("click",event=>{
+        const remove=event.target.closest("[data-remove-contract-vehicle]");
+        if(remove){remove.closest("[data-contract-vehicle]").remove();vehicleBlocks().forEach((block,index)=>block.querySelector("[data-vehicle-heading]").textContent=`Veículo ${index+1}`);syncContractTotalFromVehiclePrices();}
+      });
+      contractVehicleList.addEventListener("change",event=>{
+        const select=event.target.closest('[data-vehicle-field="catalog"]');if(!select)return;
+        const item=currentAdminData.catalogItems.find(item=>item.id===select.value);if(!item)return;
+        const block=select.closest("[data-contract-vehicle]");
+        field(block,"name").value=item.title||"";
+        field(block,"model").value=(item.title||"").replace(/\s*\d{4}(?:\/\d{4})?\s*$/,"").trim();
+        field(block,"year").value=item.year_label||item.yearLabel||"";
+        field(block,"description").value=item.description||"";
+        field(block,"price").value=Number(item.price)>0?formatBRL(item.price):"";
+        syncContractTotalFromVehiclePrices();
+      });
+      contractVehicleList.addEventListener("blur",event=>{
+        if(!event.target.matches('[data-vehicle-field="price"]'))return;
+        const value=parseBRL(event.target.value);if(event.target.value.trim()&&Number.isFinite(value)&&value>=0)event.target.value=formatBRL(value);
+        syncContractTotalFromVehiclePrices();
+      },true);
 
       const resetContractForm = () => {
+        vehicleBlocks().slice(1).forEach(block=>block.remove());
         contractForm.reset();
         syncPaymentFields();
         renderContractCatalog();
@@ -1778,12 +1796,15 @@
                 const deliveryDate = contract.deliveryDate ? formatContractDate(contract.deliveryDate) : "Sem data";
                 const createdAt = contract.createdAt ? new Date(contract.createdAt).toLocaleString("pt-BR") : "-";
                 const publicUrl = clientLink("contrato", contract.publicToken, window.location.origin);
+                const contractVehicles = Array.isArray(contract.vehicles) && contract.vehicles.length
+                  ? contract.vehicles.map(vehicle=>[vehicle.name,vehicle.model,vehicle.year].filter(Boolean).join(" • ")).join("; ")
+                  : [contract.vehicleName,contract.vehicleModel,contract.vehicleYear].filter(Boolean).join(" • ");
 
                 return `
                   <article class="admin-list-item">
                     <strong>${contract.clientName || "Contrato"}</strong>${ownerLabel(contract)}
-                    <span>${contract.vehicleName || "-"} • ${statusInfo.label}</span>
-                    <p>${contract.vehicleModel || "-"} • ${contract.vehicleYear || "-"} • ${deliveryDate}</p>
+                    <span>${contractVehicles || "-"} • ${statusInfo.label}</span>
+                    <p>${contract.vehicles?.length || 1} veículo(s) • ${deliveryDate}</p>
                     <p>${contract.publicToken || "-"} • ${createdAt}</p>
                     <div class="admin-list-item__actions">
                       <a class="button button-secondary admin-card-action" href="${publicUrl}" target="_blank" rel="noreferrer">Abrir contrato</a>
@@ -2511,6 +2532,13 @@
 
         try {
           const formData = new FormData(contractForm);
+          const vehicles=vehicleBlocks().map(block=>{
+            const price=String(field(block,"price").value||"").trim();
+            return {name:field(block,"name").value,model:field(block,"model").value,year:field(block,"year").value,
+              color:field(block,"color").value,plate:field(block,"plate").value,renavam:field(block,"renavam").value,
+              description:field(block,"description").value,price:price?parseBRL(price):null};
+          });
+          const firstVehicle=vehicles[0];
           const response = await adminFetch("/api/admin?action=contracts", {
             method: "POST",
             body: JSON.stringify({
@@ -2521,13 +2549,14 @@
               clientRg: formData.get("clientRg"),
               clientEmail: formData.get("clientEmail"),
               clientAddress: formData.get("clientAddress"),
-              vehicleName: formData.get("vehicleName"),
-              vehicleModel: formData.get("vehicleModel"),
-              vehicleYear: formData.get("vehicleYear"),
-              vehicleColor: formData.get("vehicleColor"),
-              vehiclePlate: formData.get("vehiclePlate"),
-              vehicleRenavam: formData.get("vehicleRenavam"),
-              vehicleDescription: formData.get("vehicleDescription"),
+              vehicleName: firstVehicle.name,
+              vehicleModel: firstVehicle.model,
+              vehicleYear: firstVehicle.year,
+              vehicleColor: firstVehicle.color,
+              vehiclePlate: firstVehicle.plate,
+              vehicleRenavam: firstVehicle.renavam,
+              vehicleDescription: firstVehicle.description,
+              vehicles,
               amountValue: parseBRL(formData.get("amountValue")),
               documentationValue: String(formData.get("documentationValue") || "").trim() ? parseBRL(formData.get("documentationValue")) : null,
               amountText: formData.get("amountText"),

@@ -22,6 +22,7 @@ const normalizeContractPayload = (contract) => {
     vehicleModel: contract.vehicleModel,
     vehicleYear: contract.vehicleYear,
     vehicleDescription: contract.vehicleDescription,
+    vehicles: contract.vehicles || [],
     amountValue: Number(contract.amountValue || 0),
     amountText: contract.amountText,
     paymentMethod: contract.paymentMethod,

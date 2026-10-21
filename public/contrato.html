@@ -168,6 +168,9 @@
       const renderContract = (contract) => {
         const signed = Boolean(contract.clientSignedAt);
         const signatureName = contract.clientName || "CLIENTE";
+        const vehicles = Array.isArray(contract.vehicles) && contract.vehicles.length ? contract.vehicles : [{name:contract.vehicleName,model:contract.vehicleModel,year:contract.vehicleYear}];
+        const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+        const vehicleSummary = vehicles.map(vehicle => escapeHtml([vehicle.name,vehicle.model,vehicle.year].filter(Boolean).join(" • "))).join("<br />");
 
         contractRoot.innerHTML = `
           <div class="contract-grid">
@@ -184,7 +187,7 @@
               <dl class="contract-details">
                 <div><dt>Cliente</dt><dd>${contract.clientName || "-"}</dd></div>
                 <div><dt>CPF</dt><dd>${contract.clientCpf || "-"}</dd></div>
-                <div><dt>Veículo</dt><dd>${[contract.vehicleName, contract.vehicleModel, contract.vehicleYear].filter(Boolean).join(" • ") || "-"}</dd></div>
+                <div><dt>Veículo(s)</dt><dd>${vehicleSummary || "-"}</dd></div>
                 <div><dt>Valor</dt><dd>${Number(contract.amountValue || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</dd></div>
                 <div><dt>Entrega</dt><dd>${formatLocalDate(contract.deliveryDate)}</dd></div>
               </dl>

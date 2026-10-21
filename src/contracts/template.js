@@ -93,6 +93,19 @@ export const renderAcquisitionContractHtml = (contract) => {
   const documentationAmount = contract.documentationValue === null || contract.documentationValue === undefined || contract.documentationValue === ""
     ? "________________________"
     : formatCurrency(contract.documentationValue);
+  const vehicles = Array.isArray(contract.vehicles) && contract.vehicles.length
+    ? contract.vehicles
+    : [{name:contract.vehicleName,model:contract.vehicleModel,year:contract.vehicleYear,color:contract.vehicleColor,plate:contract.vehiclePlate,renavam:contract.vehicleRenavam,description:contract.vehicleDescription}];
+  const vehiclesHtml = vehicles.map((vehicle,index) => `
+    <div class="contract-vehicle-item">
+      <strong>${index + 1}. ${escapeHtml([vehicle.name,vehicle.model].filter(Boolean).join(" / ") || "-")}</strong><br />
+      Ano: ${escapeHtml(vehicle.year || "-")}<br />
+      Cor: ${escapeHtml(vehicle.color || "-")}<br />
+      Placa: ${escapeHtml(vehicle.plate || "-")}<br />
+      Renavam: ${escapeHtml(vehicle.renavam || "-")}
+      ${vehicle.price !== null && vehicle.price !== undefined && vehicle.price !== "" ? `<br />Valor: ${formatCurrency(vehicle.price)}` : ""}
+      ${vehicle.description ? `<p class="contract-vehicle-description">${escapeHtml(vehicle.description)}</p>` : ""}
+    </div>`).join("");
 
   return `
     <article class="contract-document">
@@ -129,15 +142,8 @@ export const renderAcquisitionContractHtml = (contract) => {
 
       <section class="contract-section">
         <h2>DO OBJETO</h2>
-        <p>
-          1.1. O objeto deste contrato é o veículo descrito abaixo:<br />
-          Veículo: <strong>${escapeHtml([contract.vehicleName, contract.vehicleModel].filter(Boolean).join(" / ") || "-")}</strong><br />
-          Ano: <strong>${escapeHtml(contract.vehicleYear || "-")}</strong><br />
-          Cor: <strong>${escapeHtml(contract.vehicleColor || "-")}</strong><br />
-          Placa: <strong>${escapeHtml(contract.vehiclePlate || "-")}</strong><br />
-          Renavam: <strong>${escapeHtml(contract.vehicleRenavam || "-")}</strong>
-        </p>
-        ${contract.vehicleDescription ? `<p class="contract-vehicle-description">${escapeHtml(contract.vehicleDescription)}</p>` : ""}
+        <p>1.1. São objeto deste contrato os veículos descritos a seguir:</p>
+        ${vehiclesHtml}
       </section>
 
       <section class="contract-section">

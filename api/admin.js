@@ -117,6 +117,7 @@ const normalizeContractPayload = (contract) => {
     vehiclePlate: contract.vehiclePlate,
     vehicleRenavam: contract.vehicleRenavam,
     vehicleDescription: contract.vehicleDescription,
+    vehicles: contract.vehicles || [],
     amountValue: Number(contract.amountValue || 0),
     documentationValue: contract.documentationValue,
     amountText: contract.amountText,
@@ -569,6 +570,7 @@ export default async function handler(req, res) {
           vehiclePlate,
           vehicleRenavam,
           vehicleDescription,
+          vehicles,
           amountValue,
           documentationValue,
           amountText,
@@ -588,9 +590,31 @@ export default async function handler(req, res) {
         const finalClientRg = String(clientRg || "").trim() || null;
         const finalClientAddress = String(clientAddress || fullAddress(client) || "").trim() || null;
         const finalClientEmail = String(clientEmail || client?.email || "").trim() || null;
-        const finalVehicleName = String(vehicleName || "").trim() || null;
-        const finalVehicleModel = String(vehicleModel || "").trim() || null;
-        const finalVehicleYear = String(vehicleYear || "").trim() || null;
+        const vehicleInputs = Array.isArray(vehicles) && vehicles.length
+          ? vehicles
+          : [{name:vehicleName,model:vehicleModel,year:vehicleYear,color:vehicleColor,plate:vehiclePlate,renavam:vehicleRenavam,description:vehicleDescription}];
+        if (vehicleInputs.length > 20) return sendJson(req,res,400,{message:"Um contrato pode conter até 20 veículos."});
+        const finalVehicles = vehicleInputs.map((vehicle) => {
+          const priceText=String(vehicle?.price ?? "").trim();
+          const priceValue=priceText ? parseBRL(priceText) : null;
+          return {
+            name:String(vehicle?.name || "").trim(),
+            model:String(vehicle?.model || "").trim(),
+            year:String(vehicle?.year || "").trim(),
+            color:String(vehicle?.color || "").trim() || null,
+            plate:String(vehicle?.plate || "").trim() || null,
+            renavam:String(vehicle?.renavam || "").trim() || null,
+            description:String(vehicle?.description || "").trim() || null,
+            price:priceValue
+          };
+        });
+        if (finalVehicles.some(vehicle => !vehicle.name || !vehicle.model || !vehicle.year || (vehicle.price !== null && (!Number.isFinite(vehicle.price) || vehicle.price < 0)))) {
+          return sendJson(req,res,400,{message:"Informe nome, marca/modelo e ano de cada veículo; confira também os valores individuais preenchidos."});
+        }
+        const [firstVehicle] = finalVehicles;
+        const finalVehicleName = firstVehicle.name;
+        const finalVehicleModel = firstVehicle.model;
+        const finalVehicleYear = firstVehicle.year;
         const finalAmountValue = parseBRL(amountValue);
         const finalDocumentationValue = String(documentationValue ?? "").trim() === "" ? null : parseBRL(documentationValue);
         const finalAmountText = String(amountText || amountWords(finalAmountValue)).trim() || null;
@@ -614,12 +638,6 @@ export default async function handler(req, res) {
         if (documentationValue !== undefined && String(documentationValue).trim() !== "" &&
             (!Number.isFinite(finalDocumentationValue) || finalDocumentationValue < 0)) {
           return sendJson(req, res, 400, { message: "Informe um valor válido para a documentação ou deixe o campo em branco." });
-        }
-
-        if (!finalVehicleName || !finalVehicleModel || !finalVehicleYear) {
-          return sendJson(req, res, 400, {
-            message: "Informe nome, marca/modelo e ano do veículo/maquinário."
-          });
         }
 
         if (!Number.isFinite(finalAmountValue) || finalAmountValue <= 0) {
@@ -647,10 +665,11 @@ export default async function handler(req, res) {
           vehicleName: finalVehicleName,
           vehicleModel: finalVehicleModel,
           vehicleYear: finalVehicleYear,
-          vehicleColor: String(vehicleColor || "").trim() || null,
-          vehiclePlate: String(vehiclePlate || "").trim() || null,
-          vehicleRenavam: String(vehicleRenavam || "").trim() || null,
-          vehicleDescription: String(vehicleDescription || "").trim() || null,
+          vehicleColor: firstVehicle.color,
+          vehiclePlate: firstVehicle.plate,
+          vehicleRenavam: firstVehicle.renavam,
+          vehicleDescription: firstVehicle.description,
+          vehicles: finalVehicles,
           amountValue: finalAmountValue,
           documentationValue: finalDocumentationValue,
           amountText: finalAmountText,

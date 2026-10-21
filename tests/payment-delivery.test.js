@@ -33,6 +33,14 @@ test('acquisition term uses the COPART clauses and leaves documentation value ed
   assert.ok(withFee.includes('R$ 1.250,00') || withFee.includes('R$ 1.250,00'));
 });
 
+test('acquisition term lists every vehicle in a multi-vehicle contract', () => {
+  const html=renderAcquisitionContractHtml({amountValue:70000,vehicles:[
+    {name:'Caminhão <A>',model:'Mercedes 1113',year:'1981',color:'Azul',plate:'ABC1D23',renavam:'123',price:45000},
+    {name:'Trator',model:'Massey Ferguson 275',year:'1995',color:'Vermelho',plate:'DEF4G56',renavam:'456',price:25000}
+  ]});
+  for(const text of ['Caminhão &lt;A&gt;','Mercedes 1113','Massey Ferguson 275','1981','1995','ABC1D23','DEF4G56','R$ 45.000,00','R$ 25.000,00'])assert.ok(html.includes(text),text);
+});
+
 test('rejects missing, invalid or inconsistent payments', () => {
   for (const changes of [{ downPayment: '' }, { remainingPayment: 0 }, { remainingPayment: -1 },
     { remainingPayment: 'inválido' }, { remainingPayment: 30000 }, { downPaymentDate: '' },
@@ -51,7 +59,7 @@ test('payment selector enables only fields for the chosen option', () => {
   const selector = { value: 'cash', addEventListener() {} };
   const context = vm.createContext({ document: { getElementById: id => ids[id] }, contractPaymentNotes: selector });
   const html = fs.readFileSync(new URL('../public/admin.html', import.meta.url), 'utf8');
-  const start = html.indexOf('      const catalogSelect =');
+  const start = html.indexOf('      const installmentFields =');
   const end = html.indexOf('      const paymentSummary =', start);
   vm.runInContext(html.slice(start, end), context);
   const sync = () => vm.runInContext('syncPaymentFields()', context);
