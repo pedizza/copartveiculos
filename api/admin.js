@@ -30,6 +30,7 @@ import { handleOptions, readJsonBody, sendJson, getQueryParam } from "./_lib/htt
 import { onlyDigits, sanitizeUser } from "../src/auth/utils.js";
 import { hashPassword } from "../src/auth/security.js";
 import { resolveIronCallbackUrl } from "../src/config/ironpay.js";
+import { addFinanceEntry, currentMonthInSaoPaulo, deleteFinanceEntry, getFinanceData, resetFinanceMonth, updateFinanceEntry } from "../src/finance/repository.js";
 
 const appUrl = publicOrigin(process.env.APP_URL);
 const ironCallbackUrl = resolveIronCallbackUrl({
@@ -193,7 +194,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    await Promise.all([ensureContractSchema(), ensureInvoiceSchema()]);
+    if (!['finance','finance-reset'].includes(action)) await Promise.all([ensureContractSchema(), ensureInvoiceSchema()]);
     const requestedStaffId = String(getQueryParam(req, "staffId") || "").trim();
     if (requestedStaffId && admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode abrir o painel de um funcionário."});
     let scope = ownerScope(admin);
@@ -201,6 +202,45 @@ export default async function handler(req, res) {
       const {rows} = await pool.query("select id from public.app_users where id=$1 and role='employee'", [requestedStaffId]);
       if (!rows[0]) return sendJson(req,res,404,{message:"Funcionário não encontrado."});
       scope = rows[0].id;
+    }
+    if (action === "finance") {
+      const adminOnly = admin.role === "admin";
+      if (req.method === "GET") {
+        const data = await getFinanceData({employeeId: adminOnly ? scope : admin.id, month: currentMonthInSaoPaulo()});
+        return sendJson(req,res,200,{...data,actorRole:admin.role});
+      }
+      if (!adminOnly) return sendJson(req,res,403,{message:"Funcionários podem apenas visualizar o próprio financeiro."});
+      if (!["POST","PUT","DELETE"].includes(req.method)) return sendJson(req,res,405,{message:"Método não permitido."});
+      if (req.method === "DELETE") {
+        const id=String(getQueryParam(req,"id")||"");
+        if (!/^[0-9a-f-]{36}$/i.test(id)) return sendJson(req,res,400,{message:"Lançamento inválido."});
+        await deleteFinanceEntry(id);
+        return sendJson(req,res,200,{success:true});
+      }
+      const payload=await readJsonBody(req);
+      if (req.method === "PUT" && !/^[0-9a-f-]{36}$/i.test(String(payload.id||""))) return sendJson(req,res,400,{message:"Lançamento inválido."});
+      const employeeId=String(payload.employeeId||"");
+      if (!/^[0-9a-f-]{36}$/i.test(employeeId)) return sendJson(req,res,400,{message:"Selecione um funcionário válido."});
+      const amount=parseBRL(payload.amount);
+      if (!Number.isFinite(amount)||amount<=0||amount>=10000000000) return sendJson(req,res,400,{message:"Informe um valor válido maior que zero."});
+      const entryDate=String(payload.entryDate||"");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(entryDate)||Number.isNaN(Date.parse(`${entryDate}T12:00:00Z`))||new Date(`${entryDate}T12:00:00Z`).toISOString().slice(0,10)!==entryDate) return sendJson(req,res,400,{message:"Informe uma data válida."});
+      if(entryDate.slice(0,7)!==currentMonthInSaoPaulo()) return sendJson(req,res,400,{message:"Os lançamentos devem pertencer ao mês atual."});
+      if(entryDate>getTodayInSaoPaulo()) return sendJson(req,res,400,{message:"Não é possível lançar valores em uma data futura."});
+      const description=String(payload.description||"").trim().slice(0,250);
+      const amountInCents=Math.round(amount*100)/100;
+      if(req.method==="POST"){
+        const entry=await addFinanceEntry({employeeId,amount:amountInCents,entryDate,description,actorId:admin.id});
+        return sendJson(req,res,201,{entry});
+      }
+      const entry=await updateFinanceEntry({id:payload.id,amount:amountInCents,entryDate,description});
+      return sendJson(req,res,200,{entry});
+    }
+    if (action === "finance-reset") {
+      if (admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode resetar o financeiro."});
+      if (req.method !== "POST") return sendJson(req,res,405,{message:"Método não permitido."});
+      await resetFinanceMonth({month:currentMonthInSaoPaulo(),actorId:admin.id});
+      return sendJson(req,res,200,{success:true,month:currentMonthInSaoPaulo()});
     }
     if (action === "staff") {
       if (admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode gerenciar funcionários."});
@@ -830,6 +870,10 @@ export default async function handler(req, res) {
 
     if (action === "dashboard") {
       return sendJson(req, res, 500, { message: "Erro ao carregar o painel admin." });
+    }
+
+    if (action === "finance" || action === "finance-reset") {
+      return sendJson(req,res,500,{message:"Erro ao processar o financeiro."});
     }
 
     if (action === "customers") {

@@ -4139,6 +4139,20 @@ body.admin-menu-open {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.finance-tabs { display: flex; gap: 10px; margin: 0 0 22px; flex-wrap: wrap; }
+.finance-totals { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 20px 0; }
+.finance-person { gap: 8px; background: #fff; border: 1px solid rgba(4, 30, 66, .1); }
+.finance-person strong { color: #041e42; font-size: 1.08rem; }
+.finance-person span { color: #526276; }
+.finance-person b { color: #007c32; }
+.finance-admin-actions { margin: 20px 0; }
+.finance-add-card { padding: 20px; margin: 22px 0; border: 1px solid rgba(4, 30, 66, .12); border-radius: 16px; background: #f7f9fc; }
+.finance-add-card h3 { margin-top: 0; }
+.finance-entry { display: grid; gap: 10px; }
+.finance-entry > span { color: #526276; }
+.finance-edit-form { margin-top: 8px; padding-top: 14px; border-top: 1px solid rgba(4, 30, 66, .1); }
+.finance-edit-form .admin-form__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
 .admin-upload-note {
   margin-bottom: 12px;
   font-size: 0.92rem;

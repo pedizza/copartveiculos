@@ -106,6 +106,10 @@
                 </span>
                 <span>Contratos</span>
               </button>
+              <button class="admin-tab" type="button" data-tab-target="finance">
+                <span class="admin-tab__icon" aria-hidden="true">💰</span>
+                <span>Financeiro</span>
+              </button>
               <button class="admin-tab hidden" type="button" data-tab-target="staff" id="staffTab"><span class="admin-tab__icon" aria-hidden="true">👥</span><span>Usuários</span></button>
             </nav>
 
@@ -138,6 +142,34 @@
                   <p class="admin-status" id="staffStatus" role="status"></p>
                 </form>
                 <h3>Funcionários cadastrados</h3><div id="staffList" class="admin-list"></div>
+              </article></section>
+            </div>
+            <div class="admin-tab-panel" data-tab-panel="finance">
+              <section class="admin-section"><article class="admin-card admin-card--wide">
+                <div class="admin-card__head"><div><span class="eyebrow">Desempenho</span><h2>Financeiro</h2><p id="financeDescription">Acompanhe seus valores por período.</p><p class="admin-panel-copy">Diário considera hoje; semanal, de segunda até hoje; mensal, do início do mês até hoje. Editar um lançamento recalcula automaticamente os três totais.</p></div></div>
+                <div class="admin-actions finance-tabs" role="tablist" aria-label="Abas do financeiro">
+                  <button class="button button-primary" type="button" data-finance-view="current">Diário, semanal e mensal</button>
+                  <button class="button button-secondary" type="button" data-finance-view="history">Histórico</button>
+                </div>
+                <div id="financeCurrentView">
+                  <div class="admin-grid admin-grid--stats finance-totals" id="financeTotals"></div>
+                  <div class="admin-form__actions finance-admin-actions hidden" id="financeAdminActions">
+                    <button class="button button-secondary" type="button" id="financeResetButton">Resetar mês e guardar no histórico</button>
+                  </div>
+                  <section class="finance-add-card hidden" id="financeAddCard">
+                    <h3>Adicionar diário</h3>
+                    <form class="admin-form admin-form--grid" id="financeEntryForm">
+                      <label><span>Funcionário</span><select name="employeeId" id="financeEmployee" required></select></label>
+                      <label><span>Valor realizado (R$)</span><input name="amount" inputmode="decimal" placeholder="0,00" required /></label>
+                      <label><span>Data</span><input name="entryDate" type="date" required /></label>
+                      <label><span>Descrição (opcional)</span><input name="description" maxlength="250" /></label>
+                      <div class="admin-form__full admin-form__actions"><button class="button button-primary" type="submit">Adicionar lançamento</button><p class="admin-status" id="financeEntryStatus" role="status"></p></div>
+                    </form>
+                  </section>
+                  <h3>Lançamentos do mês</h3><div id="financeEntries" class="admin-list"></div>
+                </div>
+                <div id="financeHistoryView" class="hidden"><h3>Meses resetados</h3><div id="financeHistory" class="admin-list"></div></div>
+                <p class="admin-status" id="financeStatus" role="status"></p>
               </article></section>
             </div>
             <div class="admin-tab-panel is-active" data-tab-panel="overview">
@@ -733,6 +765,7 @@
       import {clientLink} from "./shared/public-links.js";
       import {createAdminSession} from "./shared/admin-session.js";
       import {COMPANY} from "./shared/company.js";
+      import {summarizeFinanceEntries} from "./shared/finance-utils.js";
       const invoiceLink = invoice => clientLink("fatura", invoice.publicToken, window.location.origin);
       document.querySelectorAll("[data-company-issuer]").forEach(element => {
         element.textContent = `${COMPANY.legalName} · CNPJ ${COMPANY.cnpj}`;
@@ -995,6 +1028,7 @@
           if (button.dataset.tabTarget === "contracts") {
             setContractTab("acquisition");
           }
+          if (button.dataset.tabTarget === "finance") loadFinance();
         });
       });
 
@@ -1837,6 +1871,56 @@
 
       let staffUsers = [];
       let selectedStaffId = "";
+      let financeData = null;
+      const financeMoney = value => Number(value || 0).toLocaleString("pt-BR", {style:"currency",currency:"BRL"});
+      const saoPauloDay = new Intl.DateTimeFormat("en-CA",{timeZone:"America/Sao_Paulo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+      const renderFinance = data => {
+        financeData=data;
+        const admin=data.actorRole==="admin";
+        document.getElementById("financeDescription").textContent=admin?"Acompanhe e ajuste os resultados de cada funcionário.":"Consulte seus valores. Os lançamentos são somente para visualização.";
+        document.getElementById("financeAdminActions").classList.toggle("hidden",!admin);
+        document.getElementById("financeAddCard").classList.toggle("hidden",!admin);
+        const employeeSelect=document.getElementById("financeEmployee");
+        employeeSelect.replaceChildren(...data.staff.map(item=>{const option=document.createElement("option");option.value=item.id;option.textContent=item.full_name;return option;}));
+        const grouped=summarizeFinanceEntries(data.entries,data.staff,saoPauloDay);
+        const totals=document.getElementById("financeTotals");
+        totals.innerHTML=grouped.map(employee=>`<article class="admin-stat finance-person"><strong>${escapeTrackingText(employee.full_name)}</strong><span>Diário: <b>${financeMoney(employee.daily)}</b></span><span>Semanal: <b>${financeMoney(employee.weekly)}</b></span><span>Mensal: <b>${financeMoney(employee.monthly)}</b></span></article>`).join("")||'<div class="admin-empty">Nenhum funcionário cadastrado.</div>';
+        const entries=document.getElementById("financeEntries");
+        entries.innerHTML=data.entries.length?data.entries.map(entry=>`<article class="admin-list-item finance-entry"><strong>${escapeTrackingText(entry.employee_name)} · ${financeMoney(entry.amount)}</strong><span>${escapeTrackingText(String(entry.entry_date).slice(0,10).split("-").reverse().join("/"))}${entry.description?` · ${escapeTrackingText(entry.description)}`:""}</span>${admin?`<form class="finance-edit-form admin-form admin-form--grid" data-finance-edit="${entry.id}"><label><span>Valor (R$)</span><input name="amount" inputmode="decimal" value="${Number(entry.amount).toFixed(2).replace(".",",")}" required></label><label><span>Data</span><input name="entryDate" type="date" value="${String(entry.entry_date).slice(0,10)}" required></label><label><span>Descrição</span><input name="description" maxlength="250" value="${escapeTrackingText(entry.description||"")}"></label><div class="admin-form__actions"><button class="button button-secondary" type="submit">Salvar edição</button><button class="button button-secondary" type="button" data-finance-delete="${entry.id}">Excluir</button></div></form>`:""}</article>`).join(""):'<div class="admin-empty">Nenhum lançamento neste mês.</div>';
+        document.getElementById("financeHistory").innerHTML=data.history.length?data.history.map(item=>`<article class="admin-list-item"><strong>${escapeTrackingText(item.employee_name)} · ${escapeTrackingText(item.month)}</strong><span>Total fechado: ${financeMoney(item.total)} · ${Number(item.entries?.length||0)} lançamento(s)</span><small>Resetado em ${new Date(item.reset_at).toLocaleString("pt-BR")}</small><details><summary>Ver lançamentos arquivados</summary><ul>${(item.entries||[]).map(entry=>`<li>${escapeTrackingText(String(entry.date||"").slice(0,10).split("-").reverse().join("/"))} · ${financeMoney(entry.amount)}${entry.description?` · ${escapeTrackingText(entry.description)}`:""}</li>`).join("")||"<li>Nenhum lançamento no fechamento.</li>"}</ul></details></article>`).join(""):'<div class="admin-empty">Ainda não há meses no histórico.</div>';
+      };
+      const loadFinance = async () => {
+        try{const data=await adminFetch(scopedAdminUrl("/api/admin?action=finance"));renderFinance(data);}
+        catch(error){setStatus(document.getElementById("financeStatus"),error.message,true);}
+      };
+      document.querySelectorAll("[data-finance-view]").forEach(button=>button.addEventListener("click",()=>{
+        const history=button.dataset.financeView==="history";
+        document.getElementById("financeCurrentView").classList.toggle("hidden",history);
+        document.getElementById("financeHistoryView").classList.toggle("hidden",!history);
+        document.querySelectorAll("[data-finance-view]").forEach(tab=>{tab.classList.toggle("button-primary",tab===button);tab.classList.toggle("button-secondary",tab!==button);});
+        if(history)loadFinance();
+      }));
+      document.getElementById("financeEntryForm").addEventListener("submit",async event=>{
+        event.preventDefault();const form=event.currentTarget,button=form.querySelector('button[type="submit"]'),status=document.getElementById("financeEntryStatus");button.disabled=true;
+        try{const payload=Object.fromEntries(new FormData(form));await adminFetch("/api/admin?action=finance",{method:"POST",body:JSON.stringify(payload)});form.elements.amount.value="";form.elements.description.value="";setStatus(status,"Lançamento adicionado.");await loadFinance();}
+        catch(error){setStatus(status,error.message,true);}finally{button.disabled=false;}
+      });
+      document.getElementById("financeEntries").addEventListener("submit",async event=>{
+        const form=event.target.closest("[data-finance-edit]");if(!form)return;event.preventDefault();const payload=Object.fromEntries(new FormData(form));payload.id=form.dataset.financeEdit;payload.employeeId=financeData.entries.find(item=>item.id===payload.id)?.employee_id;
+        const button=form.querySelector('button[type="submit"]');button.disabled=true;
+        try{await adminFetch("/api/admin?action=finance",{method:"PUT",body:JSON.stringify(payload)});await loadFinance();}
+        catch(error){setStatus(document.getElementById("financeStatus"),error.message,true);button.disabled=false;}
+      });
+      document.getElementById("financeEntries").addEventListener("click",async event=>{
+        const button=event.target.closest("[data-finance-delete]");if(!button)return;if(!window.confirm("Excluir este lançamento financeiro?"))return;button.disabled=true;
+        try{await adminFetch(`/api/admin?action=finance&id=${encodeURIComponent(button.dataset.financeDelete)}`,{method:"DELETE"});await loadFinance();}
+        catch(error){setStatus(document.getElementById("financeStatus"),error.message,true);button.disabled=false;}
+      });
+      document.getElementById("financeResetButton").addEventListener("click",async event=>{
+        if(!window.confirm("Guardar os valores deste mês no histórico e zerar o financeiro atual de todos os funcionários?"))return;event.currentTarget.disabled=true;
+        try{await adminFetch("/api/admin?action=finance-reset",{method:"POST",body:JSON.stringify({})});setStatus(document.getElementById("financeStatus"),"Mês guardado no histórico e valores zerados.");await loadFinance();}
+        catch(error){setStatus(document.getElementById("financeStatus"),error.message,true);}finally{event.currentTarget.disabled=false;}
+      });
       const ownerLabel = record => {
         if (currentAdminData.actor?.role !== "admin") return "";
         const id = record.owner_id || record.ownerId;
@@ -1942,6 +2026,7 @@
       invoiceDueDate.min = getTomorrowDateValue();
       invoiceDueDate.value = getTomorrowDateValue();
       contractDeliveryDate.min = getTomorrowDateValue();
+      document.getElementById("financeEntryForm").elements.entryDate.value=saoPauloDay;
 
       const renderDriverPhotoPreview = () => {
         driverPhotoPreview.innerHTML = driverPhotoBase64 ? `<img src="${driverPhotoBase64}" alt="Pré-visualização do motorista" />` : "Sem foto";
