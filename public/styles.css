@@ -4152,6 +4152,11 @@ body.admin-menu-open {
 .finance-entry > span { color: #526276; }
 .finance-edit-form { margin-top: 8px; padding-top: 14px; border-top: 1px solid rgba(4, 30, 66, .1); }
 .finance-edit-form .admin-form__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.finance-correct { width: 100%; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(4, 30, 66, .1); }
+.finance-correct summary { color: #007c32; font-weight: 800; cursor: pointer; }
+.finance-correct-form { display: grid; gap: 10px; margin-top: 10px; }
+.finance-correct-form label { display: grid; gap: 6px; color: #526276; font-size: .9rem; }
+.finance-correct-form input { width: 100%; padding: 10px 12px; border: 1px solid #dce5ed; border-radius: 10px; }
 
 .admin-upload-note {
   margin-bottom: 12px;

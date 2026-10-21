@@ -30,7 +30,7 @@ import { handleOptions, readJsonBody, sendJson, getQueryParam } from "./_lib/htt
 import { onlyDigits, sanitizeUser } from "../src/auth/utils.js";
 import { hashPassword } from "../src/auth/security.js";
 import { resolveIronCallbackUrl } from "../src/config/ironpay.js";
-import { addFinanceEntry, currentMonthInSaoPaulo, deleteFinanceEntry, getFinanceData, resetFinanceMonth, updateFinanceEntry } from "../src/finance/repository.js";
+import { addFinanceEntry, correctDailyBalance, currentMonthInSaoPaulo, deleteFinanceEntry, getFinanceData, resetFinanceMonth, updateFinanceEntry } from "../src/finance/repository.js";
 
 const appUrl = publicOrigin(process.env.APP_URL);
 const ironCallbackUrl = resolveIronCallbackUrl({
@@ -194,7 +194,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    if (!['finance','finance-reset'].includes(action)) await Promise.all([ensureContractSchema(), ensureInvoiceSchema()]);
+    if (!['finance','finance-reset','finance-correct'].includes(action)) await Promise.all([ensureContractSchema(), ensureInvoiceSchema()]);
     const requestedStaffId = String(getQueryParam(req, "staffId") || "").trim();
     if (requestedStaffId && admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode abrir o painel de um funcionário."});
     let scope = ownerScope(admin);
@@ -241,6 +241,15 @@ export default async function handler(req, res) {
       if (req.method !== "POST") return sendJson(req,res,405,{message:"Método não permitido."});
       await resetFinanceMonth({month:currentMonthInSaoPaulo(),actorId:admin.id});
       return sendJson(req,res,200,{success:true,month:currentMonthInSaoPaulo()});
+    }
+    if (action === "finance-correct") {
+      if (admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode corrigir saldos."});
+      if (req.method !== "POST") return sendJson(req,res,405,{message:"Método não permitido."});
+      const payload=await readJsonBody(req),employeeId=String(payload.employeeId||""),amount=parseBRL(payload.amount);
+      if(!/^[0-9a-f-]{36}$/i.test(employeeId)) return sendJson(req,res,400,{message:"Selecione um funcionário válido."});
+      if(!Number.isFinite(amount)||amount<0||amount>=10000000000) return sendJson(req,res,400,{message:"Informe o saldo diário correto, a partir de zero."});
+      const correction=await correctDailyBalance({employeeId,targetAmount:Math.round(amount*100)/100,entryDate:getTodayInSaoPaulo(),actorId:admin.id});
+      return sendJson(req,res,200,{success:true,...correction});
     }
     if (action === "staff") {
       if (admin.role !== "admin") return sendJson(req,res,403,{message:"Somente o administrador pode gerenciar funcionários."});
@@ -872,7 +881,7 @@ export default async function handler(req, res) {
       return sendJson(req, res, 500, { message: "Erro ao carregar o painel admin." });
     }
 
-    if (action === "finance" || action === "finance-reset") {
+    if (action === "finance" || action === "finance-reset" || action === "finance-correct") {
       return sendJson(req,res,500,{message:"Erro ao processar o financeiro."});
     }
 
