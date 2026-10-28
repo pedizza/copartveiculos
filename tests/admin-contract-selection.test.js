@@ -7,7 +7,8 @@ const api=readFileSync(new URL('../api/admin.js',import.meta.url),'utf8');
 
 test('contract form submits exactly the selected client id, without a duplicate hidden field',()=>{
   const form=page.match(/<form[^>]*id="contractForm"[\s\S]*?<\/form>/)?.[0]||'';
-  assert.match(form,/<select name="clientUserId" id="contractClientUserId">/);
+  assert.match(form,/<div class="admin-form__full" id="contractClientPicker">[\s\S]*SELECIONAR CADASTRO DO CLIENTE \(OPCIONAL\)[\s\S]*<select name="clientUserId" id="contractClientUserId" aria-describedby="contractManualClientHelp">[\s\S]*Sem cadastro — preencher dados manualmente/);
+  assert.match(form,/id="contractManualClientHelp">Esta opção aparece para todos os logins/);
   assert.equal((form.match(/name="clientUserId"/g)||[]).length,1);
   assert.match(page,/new Option\(`\$\{user\.full_name \|\| "Cliente"\} • \$\{contact\}`,user\.id\)/);
   assert.match(page,/clientUserId: formData\.get\("clientUserId"\) \|\| contractClientUserId\.value \|\| null/);

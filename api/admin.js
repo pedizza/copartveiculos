@@ -643,7 +643,8 @@ export default async function handler(req, res) {
           deliveryAddress
         } = await readJsonBody(req);
 
-        const resolvedClientUserId = clientUserId ? String(clientUserId).trim() : null;
+        const normalizedClientUserId=String(clientUserId||"").trim();
+        const resolvedClientUserId=normalizedClientUserId || null;
         if (resolvedClientUserId) {
           if (requestedStaffId && admin.role === "admin") await assertOwned({role:"employee",id:scope},"customers",resolvedClientUserId);
           else await assertOwned(admin,"customers",resolvedClientUserId);

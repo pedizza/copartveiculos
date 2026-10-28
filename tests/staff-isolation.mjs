@@ -42,6 +42,9 @@ try{
  assert.equal((await call(a,'tracking-preview','GET',{}, {id:tr.tracking.id,motion:'1'})).status,200);
  const contractPayload={clientUserId:c1.user.id,vehicleName:'Test',vehicleModel:'Test',vehicleYear:'2020',amountValue:1000,amountText:'Mil reais',paymentMethod:'Pix',paymentNotes:'À vista',deliveryDate:'2027-01-01',deliveryAddress:'Rua Teste'};
  r=await call(a,'contracts','POST',contractPayload);assert.equal(r.status,201,JSON.stringify(r));const contract=r.contract;assert.equal(contract.ownerId,a.id);
+ const manualContractPayload={clientName:'Cliente avulso',clientCpf:'12345678900',clientPhone:'11999999999',clientAddress:'Rua Manual, 10, Centro, São Paulo - SP',clientUserId:'',vehicleName:'Test',vehicleModel:'Test',vehicleYear:'2020',amountValue:1000,amountText:'Mil reais',paymentMethod:'Pix',paymentNotes:'Pagamento à vista.'};
+ const manualEmployeeContract=await call(a,'contracts','POST',manualContractPayload);assert.equal(manualEmployeeContract.status,201,JSON.stringify(manualEmployeeContract));assert.equal(manualEmployeeContract.contract.clientUserId,null);assert.equal(manualEmployeeContract.contract.ownerId,a.id);
+ const manualAdminContract=await call(root,'contracts','POST',manualContractPayload);assert.equal(manualAdminContract.status,201,JSON.stringify(manualAdminContract));assert.equal(manualAdminContract.contract.clientUserId,null);assert.equal(manualAdminContract.contract.ownerId,root.id);
  const managerContract=await call(root,'contracts','POST',contractPayload,{staffId:a.id});assert.equal(managerContract.status,201,JSON.stringify(managerContract));assert.equal(managerContract.contract.ownerId,a.id);
  assert.equal((await call(root,'contracts','POST',contractPayload,{staffId:b.id})).status,404);
  assert.equal(contract.sellerName,'Copart do Brasil Organização de Leilões Ltda');

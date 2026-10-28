@@ -500,10 +500,11 @@
 
                   <div class="admin-contract-panel is-active" data-contract-panel="acquisition">
                     <form class="admin-form admin-form--grid" id="contractForm">
-                      <label class="admin-form__full">
-                        <span>SELECIONAR CADASTRO DO CLIENTE (OPCIONAL)</span>
-                        <select name="clientUserId" id="contractClientUserId"><option value="">Preencher manualmente ou selecionar cliente</option></select>
-                      </label>
+                      <div class="admin-form__full" id="contractClientPicker">
+                        <label for="contractClientUserId"><span>SELECIONAR CADASTRO DO CLIENTE (OPCIONAL)</span></label>
+                        <select name="clientUserId" id="contractClientUserId" aria-describedby="contractManualClientHelp"><option value="">Sem cadastro — preencher dados manualmente</option></select>
+                        <p class="admin-panel-copy" id="contractManualClientHelp">Esta opção aparece para todos os logins. Selecione um cliente cadastrado ou deixe “Sem cadastro” e preencha os dados abaixo.</p>
+                      </div>
                       <label class="admin-form__full">
                         <span>NOME COMPLETO DO CLIENTE</span>
                         <input type="text" name="clientName" id="contractClientSearch" placeholder="Nome completo" autocomplete="off" required />
