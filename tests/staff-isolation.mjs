@@ -27,6 +27,9 @@ try{
  const c2=await call(b,'customers','POST',customerPayload('2'));assert.equal(c2.status,201,JSON.stringify(c2));users.push(c2.user.id);
  const managerClient=await call(root,'customers','POST',customerPayload('manager'),{staffId:a.id});assert.equal(managerClient.status,201,JSON.stringify(managerClient));users.push(managerClient.user.id);
  assert.equal((await pool.query('select owner_id from public.app_users where id=$1',[managerClient.user.id])).rows[0].owner_id,a.id);
+ assert.equal((await call(root,'customer-owner','POST',{id:managerClient.user.id,ownerId:b.id})).status,200);
+ assert.equal((await pool.query('select owner_id from public.app_users where id=$1',[managerClient.user.id])).rows[0].owner_id,b.id);
+ assert.equal((await call(root,'customer-owner','POST',{id:managerClient.user.id,ownerId:a.id})).status,200);
  const owner=(await pool.query('select owner_id,role from public.app_users where id=$1',[c1.user.id])).rows[0];assert.equal(owner.owner_id,a.id);assert.equal(owner.role,'customer');
  for(const method of ['PUT','DELETE'])assert.equal((await call(a,'customers',method,{id:c2.user.id,...customerPayload('2')})).status,404);
  assert.equal((await call(a,'customers','DELETE',{id:root.id})).status,404);

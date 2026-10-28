@@ -295,6 +295,19 @@ export default async function handler(req, res) {
       return sendJson(req, res, 200, data);
     }
 
+    if (action === "customer-owner") {
+      if(admin.role!=="admin")return sendJson(req,res,403,{message:"Somente o administrador pode alterar o responsável do cliente."});
+      if(req.method!=="POST")return sendJson(req,res,405,{message:"Método não permitido."});
+      const payload=await readJsonBody(req),id=String(payload.id||"").trim(),ownerId=payload.ownerId?String(payload.ownerId).trim():null;
+      await assertOwned(admin,"customers",id);
+      if(ownerId){
+        const {rows}=await pool.query("select id from public.app_users where id=$1 and (role='admin' or (role='employee' and is_active=true))",[ownerId]);
+        if(!rows[0])return sendJson(req,res,400,{message:"Selecione um administrador ou funcionário ativo."});
+      }
+      await pool.query("update public.app_users set owner_id=$2,updated_at=timezone('utc',now()) where id=$1 and role='customer'",[id,ownerId]);
+      return sendJson(req,res,200,{success:true,id,ownerId});
+    }
+
     if (action === "customers") {
       if (!["POST", "PUT", "DELETE"].includes(req.method)) {
         return sendJson(req, res, 405, { message: "Método não permitido." });

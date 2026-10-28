@@ -234,6 +234,7 @@
                   <div>
                     <span class="admin-eyebrow">Usuários</span>
                     <h2>Clientes cadastrados</h2>
+                    <p class="admin-panel-copy">Funcionários veem somente os clientes atribuídos a eles. O admin pode alterar o responsável na tabela.</p>
                   </div>
                   <button class="button button-primary" type="button" id="clientOpenCreateButton">Cadastrar cliente</button>
                 </div>
@@ -246,6 +247,7 @@
                         <th>Telefone</th>
                         <th>Cidade</th>
                         <th>Perfil</th>
+                        <th>Responsável</th>
                         <th>Ações</th>
                       </tr>
                     </thead>
@@ -1186,6 +1188,7 @@
                 <td>${user.whatsapp || "-"}</td>
                 <td>${[user.city, user.state].filter(Boolean).join(" / ") || "-"}</td>
                 <td>${user.role || "customer"}</td>
+                <td>${currentAdminData.actor?.role === "admin" ? `<div class="client-owner-control"><select aria-label="Responsável por ${escapeTrackingText(user.full_name || "cliente")}" data-client-owner="${user.id}"><option value="">Sem responsável de funcionário</option><option value="${currentAdminData.actor.id}" ${user.owner_id===currentAdminData.actor.id?"selected":""}>Admin / geral</option>${staffUsers.map(staff=>`<option value="${staff.id}" ${user.owner_id===staff.id?"selected":""}>${escapeTrackingText(staff.full_name)}</option>`).join("")}</select><button class="button button-secondary admin-card-action" type="button" data-save-client-owner="${user.id}">Salvar</button></div>` : escapeTrackingText(user.owner_name || "Você")}</td>
                 <td class="admin-table__actions">
                   <button class="button button-secondary admin-card-action" type="button" data-view-client="${user.id}">Abrir ficha</button>
                   <button class="button button-secondary admin-card-action" type="button" data-edit-client="${user.id}">Editar</button>
@@ -1200,6 +1203,7 @@
           const viewButton = document.querySelector(`[data-view-client="${user.id}"]`);
           const editButton = document.querySelector(`[data-edit-client="${user.id}"]`);
           const deleteButton = document.querySelector(`[data-delete-client="${user.id}"]`);
+          const assignButton = document.querySelector(`[data-save-client-owner="${user.id}"]`);
 
           if (viewButton) {
             viewButton.addEventListener("click", () =>
@@ -1250,6 +1254,12 @@
               }
             });
           }
+
+          if(assignButton)assignButton.addEventListener("click",async()=>{
+            const select=document.querySelector(`[data-client-owner="${user.id}"]`);assignButton.disabled=true;
+            try{await adminFetch("/api/admin?action=customer-owner",{method:"POST",body:JSON.stringify({id:user.id,ownerId:select.value||null})});setStatus(clientStatus,"Responsável do cliente atualizado.");await loadDashboard();}
+            catch(error){setStatus(clientStatus,error.message,true);assignButton.disabled=false;}
+          });
         });
 
         renderSimpleList(

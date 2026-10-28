@@ -16,7 +16,9 @@ test('contract form submits exactly the selected client id, without a duplicate 
 test('contracts created from an admin employee panel use that employee scope',()=>{
   assert.match(page,/adminFetch\(scopedAdminUrl\("\/api\/admin\?action=contracts"\)/);
   assert.match(page,/adminFetch\(scopedAdminUrl\("\/api\/admin\/customers"\)/);
+  assert.match(page,/data-save-client-owner=/);
   assert.match(api,/if \(requestedStaffId && admin\.role === "admin"\) await assertOwned\(\{role:"employee",id:scope\},"customers",resolvedClientUserId\)/);
   assert.match(api,/ownerId: scope \|\| admin\.id/);
   assert.match(api,/role: "customer",\s*ownerId: scope \|\| admin\.id/);
+  assert.match(api,/if \(action === "customer-owner"\)[\s\S]*role='employee' and is_active=true/);
 });
