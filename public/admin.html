@@ -498,11 +498,13 @@
 
                   <div class="admin-contract-panel is-active" data-contract-panel="acquisition">
                     <form class="admin-form admin-form--grid" id="contractForm">
-                      <input type="hidden" name="clientUserId" id="contractClientUserId" />
+                      <label class="admin-form__full">
+                        <span>SELECIONAR CADASTRO DO CLIENTE (OPCIONAL)</span>
+                        <select name="clientUserId" id="contractClientUserId"><option value="">Preencher manualmente ou selecionar cliente</option></select>
+                      </label>
                       <label class="admin-form__full">
                         <span>NOME COMPLETO DO CLIENTE</span>
-                        <input type="text" name="clientName" id="contractClientSearch" list="contractClientOptions" placeholder="Pesquisar ou digitar o nome do cliente" autocomplete="off" required />
-                        <datalist id="contractClientOptions"></datalist>
+                        <input type="text" name="clientName" id="contractClientSearch" placeholder="Nome completo" autocomplete="off" required />
                       </label>
                       <label>
                         <span>CPF DO CLIENTE</span>
@@ -844,7 +846,6 @@
       const contractStatus = document.getElementById("contractStatus");
       const contractSubmitButton = document.getElementById("contractSubmitButton");
       const contractClientSearch = document.getElementById("contractClientSearch");
-      const contractClientOptions = document.getElementById("contractClientOptions");
       const contractClientUserId = document.getElementById("contractClientUserId");
       const contractClientCpf = document.getElementById("contractClientCpf");
       const contractClientPhone = document.getElementById("contractClientPhone");
@@ -1651,27 +1652,13 @@
 
       const renderContractClientOptions = () => {
         const users = customerUsers();
-        contractClientOptions.innerHTML = users
-          .map(
-            (user) =>
-              `<option value="${user.full_name || ""}">${user.full_name || ""} • ${user.email || user.cpf || "Sem contato"}</option>`
-          )
-          .join("");
-      };
-
-      const findContractClient = (value) => {
-        const normalized = String(value || "").trim().toLowerCase();
-        if (!normalized) {
-          return null;
-        }
-
-        return customerUsers().find((user) => {
-          const candidates = [user.full_name, user.email, user.cpf, user.whatsapp]
-            .map((item) => String(item || "").trim().toLowerCase())
-            .filter(Boolean);
-
-          return candidates.includes(normalized) || candidates.some((item) => item.includes(normalized));
+        const selected=contractClientUserId.value;
+        contractClientUserId.replaceChildren(new Option("Preencher manualmente ou selecionar cliente", ""));
+        users.forEach(user=>{
+          const contact=user.cpf || user.email || user.whatsapp || "Sem documento/contato";
+          contractClientUserId.add(new Option(`${user.full_name || "Cliente"} • ${contact}`,user.id));
         });
+        if(users.some(user=>user.id===selected))contractClientUserId.value=selected;
       };
 
       const fillContractClient = (user) => {
@@ -2376,23 +2363,11 @@
         button.addEventListener("click", () => setContractTab(button.dataset.contractTabTarget));
       });
 
-      contractClientSearch.addEventListener("input", () => {
-        const matchedClient = findContractClient(contractClientSearch.value);
-
-        if (matchedClient) {
-          fillContractClient(matchedClient);
-          return;
-        }
-
-        contractClientUserId.value = "";
+      contractClientUserId.addEventListener("change", () => {
+        const matchedClient=customerUsers().find(user=>user.id===contractClientUserId.value);
+        if(matchedClient)fillContractClient(matchedClient);
       });
-
-      contractClientSearch.addEventListener("change", () => {
-        const matchedClient = findContractClient(contractClientSearch.value);
-        if (matchedClient) {
-          fillContractClient(matchedClient);
-        }
-      });
+      contractClientSearch.addEventListener("input",()=>{contractClientUserId.value="";});
 
       contractClientCpf.addEventListener("input", () => {
         contractClientCpf.value = contractClientCpf.value.replace(/[^0-9.\-\/]/g, "");
@@ -2441,7 +2416,7 @@
 
         try {
           const formData = new FormData(clientForm);
-          await adminFetch("/api/admin/customers", {
+          await adminFetch(scopedAdminUrl("/api/admin/customers"), {
             method: editingClientId ? "PUT" : "POST",
             body: JSON.stringify({
               id: editingClientId,
@@ -2629,7 +2604,7 @@
               description:field(block,"description").value,price:price?parseBRL(price):null};
           });
           const firstVehicle=vehicles[0];
-          const response = await adminFetch("/api/admin?action=contracts", {
+          const response = await adminFetch(scopedAdminUrl("/api/admin?action=contracts"), {
             method: "POST",
             body: JSON.stringify({
               clientUserId: formData.get("clientUserId") || contractClientUserId.value || null,

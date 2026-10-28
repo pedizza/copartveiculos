@@ -377,7 +377,7 @@ export default async function handler(req, res) {
         state: state ? String(state).trim() : null,
         passwordHash,
         role: "customer",
-        ownerId: admin.id
+        ownerId: scope || admin.id
       });
 
       return sendJson(req, res, 201, { user: sanitizeUser(user) });
@@ -631,7 +631,10 @@ export default async function handler(req, res) {
         } = await readJsonBody(req);
 
         const resolvedClientUserId = clientUserId ? String(clientUserId).trim() : null;
-        if (resolvedClientUserId) await assertOwned(admin,"customers",resolvedClientUserId);
+        if (resolvedClientUserId) {
+          if (requestedStaffId && admin.role === "admin") await assertOwned({role:"employee",id:scope},"customers",resolvedClientUserId);
+          else await assertOwned(admin,"customers",resolvedClientUserId);
+        }
         const client = resolvedClientUserId ? await findUserById(resolvedClientUserId) : null;
         const finalClientName = String(clientName || client?.full_name || "").trim();
         const finalClientCpf = String(clientCpf || client?.cpf || "").trim();
@@ -701,7 +704,7 @@ export default async function handler(req, res) {
 
         const publicToken = createContractToken();
         const contract = await createContract({
-          ownerId: admin.id,
+          ownerId: scope || admin.id,
           contractType: String(contractType || "acquisition").trim().toLowerCase(),
           publicToken,
           clientUserId: client?.id || resolvedClientUserId,

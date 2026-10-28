@@ -25,6 +25,8 @@ try{
  const customerPayload=n=>({fullName:'Client '+n,email:prefix+n+'@example.test',whatsapp:'11999999999',cpf:String(Date.now())+n,cep:'04258000',address:'Rua Teste',number:'1',district:'Centro',city:'São Paulo',state:'SP',password:'client123',role:'admin',ownerId:b.id});
  const c1=await call(a,'customers','POST',customerPayload('1'));assert.equal(c1.status,201,JSON.stringify(c1));users.push(c1.user.id);
  const c2=await call(b,'customers','POST',customerPayload('2'));assert.equal(c2.status,201,JSON.stringify(c2));users.push(c2.user.id);
+ const managerClient=await call(root,'customers','POST',customerPayload('manager'),{staffId:a.id});assert.equal(managerClient.status,201,JSON.stringify(managerClient));users.push(managerClient.user.id);
+ assert.equal((await pool.query('select owner_id from public.app_users where id=$1',[managerClient.user.id])).rows[0].owner_id,a.id);
  const owner=(await pool.query('select owner_id,role from public.app_users where id=$1',[c1.user.id])).rows[0];assert.equal(owner.owner_id,a.id);assert.equal(owner.role,'customer');
  for(const method of ['PUT','DELETE'])assert.equal((await call(a,'customers',method,{id:c2.user.id,...customerPayload('2')})).status,404);
  assert.equal((await call(a,'customers','DELETE',{id:root.id})).status,404);
@@ -37,6 +39,8 @@ try{
  assert.equal((await call(a,'tracking-preview','GET',{}, {id:tr.tracking.id,motion:'1'})).status,200);
  const contractPayload={clientUserId:c1.user.id,vehicleName:'Test',vehicleModel:'Test',vehicleYear:'2020',amountValue:1000,amountText:'Mil reais',paymentMethod:'Pix',paymentNotes:'À vista',deliveryDate:'2027-01-01',deliveryAddress:'Rua Teste'};
  r=await call(a,'contracts','POST',contractPayload);assert.equal(r.status,201,JSON.stringify(r));const contract=r.contract;assert.equal(contract.ownerId,a.id);
+ const managerContract=await call(root,'contracts','POST',contractPayload,{staffId:a.id});assert.equal(managerContract.status,201,JSON.stringify(managerContract));assert.equal(managerContract.contract.ownerId,a.id);
+ assert.equal((await call(root,'contracts','POST',contractPayload,{staffId:b.id})).status,404);
  assert.equal(contract.sellerName,'Copart do Brasil Organização de Leilões Ltda');
  assert.equal(contract.issuer.cnpj,'14.517.191/0001-78');
  assert.ok(contract.documentHtml.includes('Estrada Muranaka, 199'));
@@ -49,8 +53,8 @@ try{
  assert.equal(publicRes.statusCode,200);assert.equal(publicRes.body.invoice.issuer.legalName,contract.sellerName);
  assert.equal(publicRes.body.invoice.issuer.cnpj,'14.517.191/0001-78');
  assert.equal((await call(b,'invoices-sync','POST',{}, {id:inv.id})).status,404);
- const da=await call(a,'dashboard'),db=await call(b,'dashboard');assert.equal(da.status,200,JSON.stringify(da));assert.deepEqual(da.users.map(x=>x.id),[c1.user.id]);assert.deepEqual(db.users.map(x=>x.id),[c2.user.id]);assert.equal(da.trackings.length,1);assert.equal(db.trackings.length,0);assert(da.trackingClients.some(x=>x.id===c2.user.id));assert.equal(da.contractsTotal,1);assert.equal(db.contractsTotal,0);assert.equal(da.catalogItems.length,db.catalogItems.length);assert(da.catalogItems.length>0);assert.deepEqual(da.drivers,db.drivers);
- const staffView=await call(root,'dashboard','GET',{}, {staffId:a.id});assert.equal(staffView.status,200,JSON.stringify(staffView));assert.deepEqual(staffView.users.map(x=>x.id),[c1.user.id]);assert.equal(staffView.contracts.length,1);assert.equal(staffView.invoices.length,1);assert.equal((await call(a,'dashboard','GET',{}, {staffId:b.id})).status,403);
+ const da=await call(a,'dashboard'),db=await call(b,'dashboard');assert.equal(da.status,200,JSON.stringify(da));assert.deepEqual(new Set(da.users.map(x=>x.id)),new Set([c1.user.id,managerClient.user.id]));assert.deepEqual(db.users.map(x=>x.id),[c2.user.id]);assert.equal(da.trackings.length,1);assert.equal(db.trackings.length,0);assert(da.trackingClients.some(x=>x.id===c2.user.id));assert.equal(da.contractsTotal,1);assert.equal(db.contractsTotal,0);assert.equal(da.catalogItems.length,db.catalogItems.length);assert(da.catalogItems.length>0);assert.deepEqual(da.drivers,db.drivers);
+ const staffView=await call(root,'dashboard','GET',{}, {staffId:a.id});assert.equal(staffView.status,200,JSON.stringify(staffView));assert.equal(staffView.users.length,2);assert.equal(staffView.contracts.length,2);assert.equal(staffView.invoices.length,1);assert.equal((await call(a,'dashboard','GET',{}, {staffId:b.id})).status,403);
  assert.equal((await call(a,'invoices')).invoices.length,1);assert.equal((await call(b,'invoices')).invoices.length,0);
  assert.equal((await call(b,'contracts')).contracts.length,0);
  r=await call(a,'yards','POST',{name:prefix,city:'São Paulo',state:'SP',address:'Test'});assert.equal(r.status,201,JSON.stringify(r));yards.push(r.yard.id);assert((await call(b,'dashboard')).yards.some(x=>x.id===r.yard.id));
