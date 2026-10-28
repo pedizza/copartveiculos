@@ -73,6 +73,18 @@
         </div>
       </section>
 
+      <section class="tracking-public hidden" id="trackingPublicSection" aria-live="polite">
+        <div class="container">
+          <article class="tracking-public__card">
+            <span class="tracking-eyebrow">Acompanhamento</span>
+            <h1>Rastreio do veículo</h1>
+            <p id="publicTrackingMessage">Carregando informações do rastreio...</p>
+            <dl class="tracking-delivery-grid" id="publicTrackingDetails"></dl>
+            <a class="button button-secondary" href="./rastreio.html">Acessar minha conta</a>
+          </article>
+        </div>
+      </section>
+
       <section class="tracking-dashboard hidden" id="trackingDashboardSection">
         <div class="container tracking-dashboard__container">
           <div class="tracking-dashboard__topbar">
@@ -324,6 +336,7 @@
     <script src="./mobile-access.js"></script>
     <script>
       const previewId = new URLSearchParams(location.search).get("preview");
+      const publicTrackingCode = new URLSearchParams(location.search).get("code");
       const ACCESS_TOKEN_KEY = "agro_access_token";
       const REFRESH_TOKEN_KEY = "agro_refresh_token";
       const CURRENT_USER_KEY = "agro_current_user";
@@ -1172,7 +1185,7 @@
       }
       let refreshingMotion = false;
       const refreshTrackingMotion = async () => {
-        if (refreshingMotion || document.hidden || !getAccessToken() || !dashboardState) return;
+        if (publicTrackingCode || refreshingMotion || document.hidden || !getAccessToken() || !dashboardState) return;
         refreshingMotion = true;
         try {
           const url = previewId ? `/api/admin?action=tracking-preview&id=${encodeURIComponent(previewId)}&motion=1` : "/api/customer/tracking-dashboard?motion=1";
@@ -1190,7 +1203,7 @@
       window.addEventListener("focus", refreshTrackingMotion);
       let refreshingTracking = false;
       setInterval(async () => {
-        if (refreshingTracking || document.hidden || !getAccessToken() || !dashboardState) return;
+        if (publicTrackingCode || refreshingTracking || document.hidden || !getAccessToken() || !dashboardState) return;
         refreshingTracking = true;
         try {
           const data = await apiFetch(previewId ? `/api/admin?action=tracking-preview&id=${encodeURIComponent(previewId)}` : "/api/customer/tracking-dashboard");
@@ -1201,8 +1214,35 @@
           }
         } catch {} finally { refreshingTracking = false; }
       }, 10000);
+      const renderPublicTracking = async () => {
+        const section=document.getElementById("trackingPublicSection");
+        const message=document.getElementById("publicTrackingMessage");
+        const details=document.getElementById("publicTrackingDetails");
+        trackingAccessSection.classList.add("hidden");
+        section.classList.remove("hidden");
+        try {
+          const {tracking}=await apiFetch(`/api/tracking?code=${encodeURIComponent(publicTrackingCode)}`);
+          message.textContent=`${tracking.item_name || "Veículo"} • Código ${tracking.tracking_code}`;
+          const rows=[
+            ["Status",tracking.status],
+            ["Localização informada",tracking.current_location],
+            ["Previsão de entrega",tracking.expected_delivery_date ? new Date(`${tracking.expected_delivery_date}T12:00:00`).toLocaleDateString("pt-BR") : "Não informada"],
+            ["Entregador",tracking.driver_name],
+            ["Pátio",[tracking.yard_name,tracking.yard_city,tracking.yard_state].filter(Boolean).join(" • ")],
+            ["Última atualização",tracking.updated_at ? new Date(tracking.updated_at).toLocaleString("pt-BR") : "Não informada"]
+          ];
+          details.replaceChildren(...rows.map(([label,value])=>{
+            const row=document.createElement("div"),dt=document.createElement("dt"),dd=document.createElement("dd");
+            dt.textContent=label;dd.textContent=value || "Não informado";row.append(dt,dd);return row;
+          }));
+        } catch(error) {
+          message.textContent=error.message || "Não foi possível localizar este rastreio.";
+        }
+      };
       const currentUser = getCurrentUser();
-      if (previewId || (getAccessToken() && currentUser)) {
+      if (publicTrackingCode) {
+        renderPublicTracking();
+      } else if (previewId || (getAccessToken() && currentUser)) {
         activateTrackingTab(requestedTrackingTab);
         loadDashboard();
       } else {

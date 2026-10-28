@@ -1109,6 +1109,9 @@ const handleCatalogDetail = async (req, res) => {
 };
 
 const handleTrackingLookup = async (req, res) => {
+  res.setHeader("Cache-Control", "private, no-store, max-age=0");
+  res.setHeader("CDN-Cache-Control", "no-store");
+  res.setHeader("Vercel-CDN-Cache-Control", "no-store");
   try {
     const trackingCode = req.query.code ? String(req.query.code).trim().toUpperCase() : "";
 

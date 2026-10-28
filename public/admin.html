@@ -1522,7 +1522,8 @@
               <p>${tracking.item_name || "-"} • ${tracking.current_location || "Sem local atual"}</p>
               <p>Alerta: ${escapeTrackingText(tracking.alert_message || tracking.status || "-")}</p>
               <p>${tracking.driver_name || "Sem motorista"} • ${tracking.yard_name || "Sem pátio"}</p>
-              <a class="button button-secondary" href="./rastreio.html?preview=${encodeURIComponent(tracking.id)}" target="_blank" rel="noopener">Ver como cliente</a>
+              <button class="button button-primary" type="button" data-copy-tracking-link="${tracking.id}">Copiar link para o cliente</button>
+              <a class="button button-secondary" href="./rastreio.html?preview=${encodeURIComponent(tracking.id)}" target="_blank" rel="noopener">Prévia interna (admin)</a>
               <button class="button button-secondary admin-card-action--danger" type="button" data-delete-tracking="${tracking.id}">Excluir rastreio</button>
               <form class="admin-tracking-status-form" data-update-tracking="${tracking.id}">
                 <label><span>Alterar status</span><input name="status" list="trackingStatusSuggestions" maxlength="120" required aria-label="Novo status do rastreio" placeholder="Selecione ou escreva um status" /></label>
@@ -1534,6 +1535,16 @@
             </article>
           `
         );
+        trackingsList.querySelectorAll("[data-copy-tracking-link]").forEach(button => button.addEventListener("click", async () => {
+          const tracking=trackings.find(item=>item.id===button.dataset.copyTrackingLink);
+          if(!tracking?.tracking_code)return;
+          const url=new URL("/rastreio",window.location.origin);
+          url.searchParams.set("code",tracking.tracking_code);
+          try{
+            await navigator.clipboard.writeText(url.toString());
+            const original=button.textContent;button.textContent="Link copiado";setTimeout(()=>button.textContent=original,1800);
+          }catch{window.prompt("Copie o link do rastreio para enviar ao cliente:",url.toString());}
+        }));
         trackingsList.querySelectorAll("[data-update-tracking]").forEach(form => {
           const tracking = trackings.find(item => item.id === form.dataset.updateTracking);
           form.elements.currentLocation.value = tracking?.current_location || "";

@@ -665,30 +665,20 @@ export const findPublicTrackingByCode = async (trackingCode) => {
       select
         t.id,
         t.client_name,
-        t.client_email,
         t.item_name,
         t.tracking_code,
         t.status,
         t.current_location,
         t.expected_delivery_date,
-        t.notes,
         t.created_at,
+        t.updated_at,
         d.full_name as driver_name,
         y.name as yard_name,
         y.city as yard_city,
-        y.state as yard_state,
-        concat_ws(', ',
-          nullif(u.address, ''),
-          nullif(u.number, ''),
-          nullif(u.district, ''),
-          nullif(u.city, ''),
-          nullif(u.state, ''),
-          nullif(u.cep, '')
-        ) as destination_address
+        y.state as yard_state
       from public.app_client_tracking t
       left join public.app_drivers d on d.id = t.driver_id
       left join public.app_yards y on y.id = t.yard_id
-      left join public.app_users u on u.id = t.client_user_id
       where upper(t.tracking_code) = upper($1)
       limit 1
     `,

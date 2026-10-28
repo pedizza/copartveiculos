@@ -6253,6 +6253,11 @@ h1, h2, h3 { letter-spacing: -0.025em; }
 @media(max-width: 640px) { .tracking-delivery-grid { grid-template-columns: 1fr; } }
 .tracking-animation-notice { padding: 12px 18px; margin: 0; background: #eaf4ee; color: #155439; font-size: .8rem; line-height: 1.6; }
 .tracking-animation-notice button { margin-left: 10px; padding: 6px 10px; border: 1px solid #97b9a5; border-radius: 6px; background: #fff; color: #155439; cursor: pointer; }
+.tracking-public { padding: 72px 0 88px; }
+.tracking-public__card { max-width: 860px; margin: 0 auto; padding: clamp(24px, 5vw, 48px); border: 1px solid rgba(0, 124, 50, .12); border-radius: 24px; background: #fff; box-shadow: 0 20px 46px rgba(22, 48, 34, .08); }
+.tracking-public__card h1 { margin: 10px 0; color: #041e42; font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.5rem); }
+.tracking-public__card > p { color: #52677a; line-height: 1.65; }
+.tracking-public__card .tracking-delivery-grid { margin: 28px 0; }
 
 .tracking-demo-badge { display: inline-block; margin-left: 8px; padding: 2px 8px; border: 1px solid #97b9a5; border-radius: 999px; color: #155439; background: #fff; font-size: .7rem; font-weight: 600; vertical-align: middle; }
 .admin-tracking-status-form { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-top: 16px; }
