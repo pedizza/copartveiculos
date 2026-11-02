@@ -57,10 +57,24 @@ export const getFinanceData = async ({employeeId = null, month = currentMonthInS
     where e.archived_month is null and to_char(e.entry_date,'YYYY-MM')=$1 ${employeeFilter}
     order by e.entry_date desc,e.created_at desc`, values);
   const histValues = employeeId ? [employeeId] : [];
-  const historyFilter = employeeId ? 'where h.employee_id=$1' : '';
-  const {rows: history} = await pool.query(`select h.id,h.month,h.employee_id,u.full_name as employee_name,h.total::float8 as total,h.entries,h.reset_at
-    from public.app_financial_history h join public.app_users u on u.id=h.employee_id ${historyFilter}
-    order by h.month desc,u.full_name`, histValues);
+  const historyScope = employeeId ? 'and h.employee_id=$1' : '';
+  const archivedScope = employeeId ? 'and e.employee_id=$1' : '';
+  const {rows: history} = await pool.query(`
+    select h.id,h.month,h.employee_id,u.full_name as employee_name,h.total::float8 as total,h.entries,h.reset_at
+    from public.app_financial_history h
+    left join public.app_users u on u.id=h.employee_id
+    where true ${historyScope}
+    union all
+    select null::uuid as id,e.archived_month as month,e.employee_id,u.full_name as employee_name,
+      sum(e.amount)::float8 as total,
+      jsonb_agg(jsonb_build_object('id',e.id,'amount',e.amount,'date',e.entry_date,'description',e.description,'isAdjustment',e.is_adjustment) order by e.entry_date,e.created_at) as entries,
+      max(e.updated_at) as reset_at
+    from public.app_financial_entries e
+    left join public.app_users u on u.id=e.employee_id
+    where e.archived_month is not null ${archivedScope}
+      and not exists (select 1 from public.app_financial_history h where h.month=e.archived_month and h.employee_id=e.employee_id)
+    group by e.archived_month,e.employee_id,u.full_name
+    order by month desc,employee_name`, histValues);
   const staff = employeeId
     ? (await pool.query("select id,full_name from public.app_users where id=$1 and role='employee'",[employeeId])).rows
     : (await pool.query("select id,full_name from public.app_users where role='employee' order by full_name")).rows;
