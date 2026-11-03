@@ -41,6 +41,15 @@ test('acquisition term lists every vehicle in a multi-vehicle contract', () => {
   for(const text of ['Caminhão &lt;A&gt;','Mercedes 1113','Massey Ferguson 275','1981','1995','ABC1D23','DEF4G56','R$ 45.000,00','R$ 25.000,00'])assert.ok(html.includes(text),text);
 });
 
+test('drawn client signature is embedded in the signed contract and escaped as an image source', () => {
+  const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB';
+  const html=renderAcquisitionContractHtml({clientSignedAt:'2026-11-03T12:00:00Z',clientName:'Cliente Teste',clientSignatureStyle:'drawn',clientSignatureText:image});
+  assert.ok(html.includes(`<img class="contract-signature__image" src="${image}" alt="Assinatura desenhada do cliente" />`));
+  const invalid=renderAcquisitionContractHtml({clientSignedAt:'2026-11-03T12:00:00Z',clientName:'Cliente Teste',clientSignatureStyle:'drawn',clientSignatureText:'<script>alert(1)</script>'});
+  assert.ok(!invalid.includes('<script>alert(1)</script>'));
+  assert.ok(invalid.includes('&lt;script&gt;alert(1)&lt;/script&gt;'));
+});
+
 test('rejects missing, invalid or inconsistent payments', () => {
   for (const changes of [{ downPayment: '' }, { remainingPayment: 0 }, { remainingPayment: -1 },
     { remainingPayment: 'inválido' }, { remainingPayment: 30000 }, { downPaymentDate: '' },

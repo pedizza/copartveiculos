@@ -78,13 +78,14 @@ export const renderAcquisitionContractHtml = (contract) => {
   const sellerSignatureText = escapeHtml(
     formatCompanySignatureText(contract.sellerSignatureText || contract.sellerName || COMPANY.legalName)
   );
-  const clientSignatureText = escapeHtml(
-    contract.clientSignedAt
-      ? contract.clientSignatureText ||
-          buildSignatureText(contract.clientName, contract.clientSignatureStyle || "cursive")
-      : "ASSINATURA DIGITAL DO CLIENTE"
-  );
-  const clientSignatureStyleClass = getSignatureClass(contract.clientSignatureStyle || "cursive");
+  const clientSignatureValue = contract.clientSignedAt
+    ? contract.clientSignatureText || buildSignatureText(contract.clientName, contract.clientSignatureStyle || "cursive")
+    : "ASSINATURA DIGITAL DO CLIENTE";
+  const clientSignatureImage = contract.clientSignedAt && contract.clientSignatureStyle === "drawn" && /^data:image\/png;base64,[A-Za-z0-9+/]+={0,2}$/.test(String(clientSignatureValue))
+    ? `<img class="contract-signature__image" src="${escapeHtml(clientSignatureValue)}" alt="Assinatura desenhada do cliente" />`
+    : escapeHtml(clientSignatureValue);
+  const clientSignatureText = clientSignatureImage;
+  const clientSignatureStyleClass = contract.clientSignatureStyle === "drawn" ? "signature-style-drawn" : getSignatureClass(contract.clientSignatureStyle || "cursive");
   const sellerSignatureStyleClass = getSignatureClass("hand");
   const sellerSignatureHash = formatSignatureHash(contract.sellerSignatureHash, `sig_${String(contract.publicToken || "seller").slice(-8)}`);
   const clientSignatureHash = contract.clientSignedAt
